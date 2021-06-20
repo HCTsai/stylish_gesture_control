@@ -6,11 +6,13 @@
 
 
 ### 1. 手勢操作電腦
+---
 1. 運行 guesture_powerpoint_control.py
 2. 打開 powpoint 進行手勢操作 
 3. 全程使用型男帥氣手勢，完成整個簡報流程 (完全不需要操作鍵盤滑鼠)
 
 ### 2. 手勢操作範例
+---
 
 紳士風 (Gentleman Style)
 * [右手比讚] --> [AI 自動執行 page down] --> [簡報下一頁]
@@ -35,6 +37,7 @@
 * ![用心開會](img/gif/star_heart_gesture.gif)
 
 ### 3. 安裝說明
+---
 #### 使用 pip 安裝以下 Library
 * pip install mediapipe==0.8.3
 * pip install opencv-python==4.5.2.52
@@ -47,6 +50,7 @@
 * pip install -r requirements.txt
 
 ### 4. 系統設定說明 
+---
 
 設定 Hand Gestures 所對應的鍵盤動作：
 ![gesture_to_action](img/jpg/gestures_to_actions.jpg)
@@ -61,6 +65,7 @@ data/gesture_to_keyboard.txt
 * ["left_heart"] ---> ["esc"]
 
 ### 5. 原理說明
+---
 
 * 1.擷取視訊中的frame
 * 2.分析 frame 出現的手，與關鍵節點 (landmarks)
@@ -73,6 +78,7 @@ data/gesture_to_keyboard.txt
 * 5.將 Gesutre 轉換成鍵盤事件執行
 
 ### 6. 疑難排解
+---
 
 * 問題1: 運行程式碼出現錯誤訊息
 
@@ -91,6 +97,7 @@ https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-download
 https://aka.ms/vs/16/release/vc_redist.x64.exe
 
 ### 7. 延伸應用
+---
 
 * 智慧製造：
 ![factory_application](img/jpg/factory_application.jpg)
