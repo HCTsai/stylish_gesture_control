@@ -1,7 +1,7 @@
 '''
 Created on 2021年5月29日
 
-@author: HC
+@author: Hsiao-Chien Tsai(蔡効謙)
 '''
 import cv2
 import mediapipe as mp

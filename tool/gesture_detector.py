@@ -1,7 +1,7 @@
 '''
 Created on 2021年6月20日
 
-@author: hsiaochien.tsai
+@author: Hsiao-Chien Tsai(蔡効謙)
 '''
 import sys
 import math

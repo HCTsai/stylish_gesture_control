@@ -1,7 +1,7 @@
 '''
 Created on 2021年5月3日
 
-@author: hsiaochien.tsai
+@author: Hsiao-Chien Tsai(蔡効謙)
 '''
 def list_to_file(data_list,cols=[], delimiter = ",", out_file = "outfile.txt"):
     with open(out_file,"w",encoding="utf-8") as f:        

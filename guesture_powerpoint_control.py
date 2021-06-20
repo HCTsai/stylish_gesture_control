@@ -1,7 +1,7 @@
 '''
 Created on 2021年5月29日
 
-@author: HC
+@author: Hsiao-Chien Tsai(蔡効謙)
 '''
 import cv2
 from tool import HandDetection
@@ -117,7 +117,7 @@ if __name__ == "__main__" :
             # 將手指特徵放到 queue 內，並顯示手指畫面
             store_finger_features(img, lmslist, hand_label)
             #            
-        cv2.imshow('Image', img)    
+        cv2.imshow('Gesture Image', img)    
         k = cv2.waitKey(1)
         if k == ord('q'):
             break

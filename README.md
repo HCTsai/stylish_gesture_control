@@ -3,13 +3,13 @@
 * 讓你用 型男的手勢 操作簡報
 ![logo](img/jpg/hand_gesture_remote_control.jpg)
 
-
 ---
 ### 1. 手勢操作電腦
 
 1. 運行 guesture_powerpoint_control.py
 2. 打開 powpoint 進行手勢操作 
 3. 全程使用型男帥氣手勢，完成整個簡報流程 (完全不需要操作鍵盤滑鼠)
+
 ---
 ### 2. 手勢操作範例
 
@@ -33,8 +33,10 @@
 * [左手比心] --> [AI 自動執行 esc] --> [停止播放簡報]
 * ![左手比心，結束簡報](img/gif/left_heart.gif)
 
-* (上次我這樣開會，很多女生都要跟我加Line)
+* (上次我開會手指比心，很多女生都要主動跟我加Line)
 * ![用心開會](img/gif/star_heart_gesture.gif)
+* (上次我开会手指比心，很多女生都要主动跟我加微信)
+
 ---
 ### 3. 安裝說明
 
@@ -48,6 +50,7 @@
 
 也可使用 :
 * pip install -r requirements.txt
+
 ---
 ### 4. 系統設定說明 
 
@@ -63,6 +66,19 @@ data/gesture_to_keyboard.txt
 
 * ["right_heart"] ---> ["shift+F5"]
 * ["left_heart"] ---> ["esc"]
+
+目前支持的手勢包含：
+
+* ![右手比心](img/jpg/right_heart_m.jpg)
+* ![左手比心](img/jpg/left_heart_m.jpg)
+* ![右手比讚](img/jpg/right_thumb_up_m.jpg)
+* ![左手比讚](img/jpg/left_thumb_up_m.jpg)
+* ![右手Rock](img/jpg/right_rock_m.jpg)
+* ![左手Rock](img/jpg/left_rock_m.jpg)
+* 向右滑動
+* 向左滑動
+* 手指比 1,2,3,4,5
+
 ---
 ### 5. 原理說明
 
@@ -76,6 +92,7 @@ data/gesture_to_keyboard.txt
 	* 時間序列模型偵測 Gesture
 
 * 5.將 Gesutre 轉換成鍵盤事件執行
+
 ---
 ### 6. 疑難排解
 
@@ -93,8 +110,9 @@ https://github.com/google/mediapipe/issues/1839
 
 * 解決方法：安裝 Microsoft Visual C++ Redistributable
 
-https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
-https://aka.ms/vs/16/release/vc_redist.x64.exe
+* https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
+* https://aka.ms/vs/16/release/vc_redist.x64.exe
+
 ---
 ### 7. 延伸應用
 
@@ -104,4 +122,20 @@ https://aka.ms/vs/16/release/vc_redist.x64.exe
 ---
 * 產品發表會：
 ![meeting_application](img/jpg/meeting_application.jpg)
+
 ---
+### 8. 開發 Roadmap
+* 手勢錄影：可以錄製自定義手勢。
+* 雙手手勢：基於雙手的手勢控制。
+* 整合滑鼠控制：使用手勢控制滑鼠操作。
+
+#### 參考資料
+1. [mediapipe](https://google.github.io/mediapipe/)
+2. [hand-gesture-recognition-mediapipe](https://github.com/kinivi/hand-gesture-recognition-mediapipe)
+3. [Custom_Hand_Gesture_Recognition_and_Control](https://github.com/atharvakale31/Custom_Hand_Gesture_Recognition_and_Control)
+
+#### 關鍵字
++ Gesture Detection
++ Gesture Recognition
++ 手勢識別，手勢辨識
++ 手势识别，手势辨识
