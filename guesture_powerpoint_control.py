@@ -37,9 +37,9 @@ def store_finger_features(img, lmslist, hand_label):
         finger_queue.put(lmslist) 
         
         # 顯示手指
-        cnt = gesture_detector.detect_finger_count(img, lmslist, hand_label)
+        # cnt = gesture_detector.detect_finger_count(img, lmslist, hand_label)
         # 文字/左上角座標/字體/字體大小/顏色/字体粗細
-        cv2.putText(img, str(cnt), (25, 100), cv2.FONT_HERSHEY_DUPLEX, 4, (0, 0, 255),8)
+        #cv2.putText(img, str(cnt), (25, 100), cv2.FONT_HERSHEY_DUPLEX, 4, (0, 0, 255),8)
         
 def gestures_to_keyboard(gestures):
     print ("偵測到手勢事件:{}".format(gestures))    
