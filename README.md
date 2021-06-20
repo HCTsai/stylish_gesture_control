@@ -3,8 +3,39 @@
 * 讓你用 型男的手勢 操作簡報
 ![logo](img/jpg/hand_gesture_remote_control.jpg)
 
-## 1. 安裝說明
-### 使用 pip 安裝以下 Library
+
+
+### 1. 手勢操作電腦
+1. 運行 guesture_powerpoint_control.py
+2. 打開 powpoint 進行手勢操作 
+3. 全程使用型男帥氣手勢，完成整個簡報流程 (完全不需要操作鍵盤滑鼠)
+
+### 2. 手勢操作範例
+
+紳士風 (Gentleman Style)
+* [右手比讚] --> [AI 自動執行 page down] --> [簡報下一頁]
+* ![右手比讚，簡報下一頁](img/gif/right_thumb_up.gif)
+* [左手比讚] --> [AI 自動執行 page up] --> [簡報上一頁]
+* ![左手比讚，播放上一頁](img/gif/left_thumb_up.gif)
+
+
+搖滾風 (Rock Style)
+* [右手Rock] --> [AI 自動執行 shift+F5] --> [播放簡報]
+* ![右手Rock，播放簡報](img/gif/right_rock.gif)
+* [左手Rock] --> [AI 自動執行 esc] --> [停止播放簡報]
+* ![左手Rock，停止簡報](img/gif/left_rock.gif)
+
+韓風 (Korean Style)
+* [右手比心] --> [AI 自動執行 shift+F5] --> [播放簡報]
+* ![右手比心，播放簡報](img/gif/right_heart.gif)
+* [左手比心] --> [AI 自動執行 esc] --> [停止播放簡報]
+* ![左手比心，結束簡報](img/gif/left_heart.gif)
+
+* (上次我這樣開會，很多女生都要跟我加Line)
+* ![用心開會](img/gif/star_heart_gesture.gif)
+
+### 3. 安裝說明
+#### 使用 pip 安裝以下 Library
 * pip install mediapipe==0.8.3
 * pip install opencv-python==4.5.2.52
 * pip install keyboard==0.13.5
@@ -14,36 +45,6 @@
 
 也可使用 :
 * pip install -r requirements.txt
-
-### 2. 手勢操作電腦
-1. 運行 guesture_powerpoint_control.py
-2. 打開 powpoint 進行手勢操作 
-3. 全程使用型男帥氣手勢，完成整個簡報流程 (完全不需要操作鍵盤滑鼠)
-
-### 3. 手勢操作範例
-
-紳士風 (Gentleman Style)
-* [右手比讚] --> [AI 按下鍵盤 page down] --> [簡報下一頁]
-* ![右手比讚，簡報下一頁](img/gif/right_thumb_up.gif)
-* [左手比讚] --> [AI 按下鍵盤 page up] --> [簡報上一頁]
-* ![左手比讚，播放上一頁](img/gif/left_thumb_up.gif)
-
-
-搖滾風 (Rock Style)
-* [右手Rock] --> [AI 按下鍵盤 shift+F5] --> [播放簡報]
-* ![右手Rock，播放簡報](img/gif/right_rock.gif)
-* [左手Rock] --> [AI 按下鍵盤 esc] --> [停止播放簡報]
-* ![左手Rock，停止簡報](img/gif/left_rock.gif)
-
-韓風 (Korean Style)
-* [右手比心] --> [AI 按下鍵盤 shift+F5] --> [播放簡報]
-* ![右手比心，播放簡報](img/gif/right_heart.gif)
-* [左手比心] --> [AI 按下鍵盤 esc] --> [停止播放簡報]
-* ![左手比心，結束簡報](img/gif/left_heart.gif)
-
-* (上次我這樣開會，很多女生都要跟我加Line)
-* ![用心開會](img/gif/star_heart_gesture.gif)
-
 
 ### 4. 系統設定說明 
 
