@@ -68,13 +68,12 @@ data/gesture_to_keyboard.txt
 * ["left_heart"] ---> ["esc"]
 
 目前支持的手勢包含：
-
-* ![右手比心](img/jpg/right_heart_m.jpg)
-* ![左手比心](img/jpg/left_heart_m.jpg)
-* ![右手比讚](img/jpg/right_thumb_up_m.jpg)
-* ![左手比讚](img/jpg/left_thumb_up_m.jpg)
-* ![右手Rock](img/jpg/right_rock_m.jpg)
-* ![左手Rock](img/jpg/left_rock_m.jpg)
+* 比心
+* ![右手比心](img/jpg/right_heart_m.jpg) ![左手比心](img/jpg/left_heart_m.jpg)
+* 比讚
+* ![右手比讚](img/jpg/right_thumb_up_m.jpg) ![左手比讚](img/jpg/left_thumb_up_m.jpg)
+* Rock!
+* ![右手Rock](img/jpg/right_rock_m.jpg) ![左手Rock](img/jpg/left_rock_m.jpg)
 * 向右滑動
 * 向左滑動
 * 手指比 1,2,3,4,5
