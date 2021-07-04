@@ -49,20 +49,22 @@ def detect_heart_gesture(landmark_list):
     gestures = []  
     right_action_count = 0    
     left_action_count = 0
-    for lmks in landmark_list[0:] :
+    for lmks in landmark_list[0:] : #大拇指，食指 高於其他手指
         if ( (lmks[4][2] < lmks[12][2] and lmks[4][2] < lmks[16][2] and lmks[4][2] < lmks[20][2]) and  
              (lmks[8][2] < lmks[12][2] and lmks[4][2] < lmks[16][2] and lmks[4][2] < lmks[20][2]) and  
             #小指 高於 中指，無名指
-            lmks[8][1] > lmks[4][1] and  math.fabs(lmks[8][2] - lmks[4][2]) < 0.05 #食指拇指交叉
+            #lmks[8][1] > lmks[4][1] and  math.fabs(lmks[8][2] - lmks[4][2]) < 0.05 #食指拇指交叉
+            math.fabs(lmks[8][1] - lmks[4][1]) < 0.05 and  math.fabs(lmks[8][2] - lmks[4][2]) < 0.05 #食指拇指交叉
             and lmks[0][0] == 1): # 右手
                     right_action_count += 1
         if ( (lmks[4][2] < lmks[12][2] and lmks[4][2] < lmks[16][2] and lmks[4][2] < lmks[20][2]) and  
              (lmks[8][2] < lmks[12][2] and lmks[4][2] < lmks[16][2] and lmks[4][2] < lmks[20][2]) and  
             #小指 高於 中指，無名指
-            lmks[8][1] < lmks[4][1] and  math.fabs(lmks[8][2] - lmks[4][2]) < 0.05#食指拇指交叉
+            # lmks[8][1] < lmks[4][1] and  math.fabs(lmks[8][2] - lmks[4][2]) < 0.05#食指拇指交叉
+            math.fabs(lmks[8][1] - lmks[4][1]) < 0.05 and  math.fabs(lmks[8][2] - lmks[4][2]) < 0.05#食指拇指交叉
             and lmks[0][0] == 0): # 左手
                     left_action_count += 1
-        #print (lmks[8][2] - lmks[4][2])         
+        #print (lmks[8][1] - lmks[4][1])         
     if right_action_count > len(landmark_list)/2 :
         print ("right_heart:{}".format(right_action_count))   
         gestures.append("right_heart")

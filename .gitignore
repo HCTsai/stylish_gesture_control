@@ -1,4 +1,6 @@
 #develop folders
+build/
+dist/
 log/
 *.log
 .project
