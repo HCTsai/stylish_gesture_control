@@ -1,8 +1,8 @@
 #gesture_name,keyboard_key,dislpay_label
-left,esc,跳出
-right,shift+F5,播放
-up,page up,下一頁
-down,page down,上一頁
+#left,esc,跳出
+#right,shift+F5,播放
+#up,page up,下一頁
+#down,page down,上一頁
 right_thumbs_up,page down,下一頁
 left_thumbs_up,page up,上一頁
 left_rock,esc,跳出

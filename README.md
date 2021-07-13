@@ -6,7 +6,7 @@
 ---
 ### 1. 手勢操作電腦
 
-1. 運行 guesture_powerpoint_control.py
+1. 運行 gesture_powerpoint_control.py
 2. 打開 powpoint 進行手勢操作 
 3. 全程使用型男帥氣手勢，完成整個簡報流程 (完全不需要操作鍵盤滑鼠)
 
