@@ -24,12 +24,12 @@ def detect_finger_count(img, landmark_list, hand_label):
         # 還要判斷手
         if tid == 4 :
             if hand_label == "Right" :
-                if landmark_list[tid][1] > landmark_list[tid - 1][1]:
+                if landmark_list[tid][1] < landmark_list[tid - 1][1]:
                     fingers.append(1)
                 else:
                     fingers.append(0)
             else : #左手
-                if landmark_list[tid][1] < landmark_list[tid - 1][1]:
+                if landmark_list[tid][1] > landmark_list[tid - 1][1]:
                     fingers.append(1)
                 else:
                     fingers.append(0)
@@ -46,7 +46,8 @@ def detect_finger_count(img, landmark_list, hand_label):
 def get_area(x,y):
     
     index_y = int(y/0.333) 
-    index_x = 3-int(x/0.333)  # mirror mode
+    #index_x = 3-int(x/0.333)  # mirror mode
+    index_x = int(x/0.333) 
     area = index_y * 3 + index_x
     return area     
     
@@ -78,6 +79,7 @@ def detect_click_gesture(landmark_list):
     left_action_count = 0
     right_click_finger = [0,0,0,0] # 食指，中指，無名，小指
     left_click_finger = [0,0,0,0]# 食指，中指，無名，小指
+    gesture_labels = ["click_{}".format(i) for i in range(8)]
     dist = 0.05
     for lmks in landmark_list[0:] : 
         #判斷拇指與各手指的距離
@@ -86,28 +88,28 @@ def detect_click_gesture(landmark_list):
                 right_click_finger[0] += 1
                 right_action_count += 1
             else :
-                left_click_finger[0] += 1
+                left_click_finger[3] += 1
                 left_action_count +=1
         if (math.fabs(lmks[12][1] - lmks[4][1]) < dist and  math.fabs(lmks[12][2] - lmks[4][2]) < dist) :
             if lmks[0][0] == 1 :# right hand
                 right_click_finger[1] += 1
                 right_action_count += 1
             else :
-                left_click_finger[1] += 1 
+                left_click_finger[2] += 1 
                 left_action_count +=1   
         if (math.fabs(lmks[16][1] - lmks[4][1]) < dist and  math.fabs(lmks[16][2] - lmks[4][2]) < dist) :
             if lmks[0][0] == 1 :# right hand
                 right_click_finger[2] += 1
                 right_action_count += 1
-                left_action_count +=1
             else :
-                left_click_finger[2] += 1   
+                left_click_finger[1] += 1   
+                left_action_count +=1
         if (math.fabs(lmks[20][1] - lmks[4][1]) < dist and  math.fabs(lmks[20][2] - lmks[4][2]) < dist) :
             if lmks[0][0] == 1 :# right hand
                 right_click_finger[3] += 1
                 right_action_count += 1
             else :
-                left_click_finger[3] += 1   
+                left_click_finger[0] += 1   
                 left_action_count +=1
     for i, n in enumerate(right_click_finger) :
         if n > len(landmark_list)/2 :
@@ -120,9 +122,12 @@ def detect_click_gesture(landmark_list):
         else :
             left_click_finger[i] = 0    
     
-    print ("Left finger clicks:{}  right finger clicks{}"
-           .format(left_click_finger,right_click_finger))
-    
+    #print ("Left finger clicks:{}  right finger clicks{}"
+    #       .format(left_click_finger,right_click_finger))
+    for i, f in enumerate(left_click_finger + right_click_finger) :
+        if f > 0 :
+            gestures.append(gesture_labels[i])
+    return gestures
 def detect_heart_gesture(landmark_list):
     gestures = []  
     right_action_count = 0    
@@ -131,7 +136,7 @@ def detect_heart_gesture(landmark_list):
         if ( (lmks[4][2] < lmks[12][2] and lmks[4][2] < lmks[16][2] and lmks[4][2] < lmks[20][2]) and  
              (lmks[8][2] < lmks[12][2] and lmks[4][2] < lmks[16][2] and lmks[4][2] < lmks[20][2]) and  
              # 中指，無名指，小指 順序
-             (lmks[12][1] <  lmks[20][1] ) and
+             (lmks[12][1] >  lmks[20][1] ) and
              #食指拇指相近
               math.fabs(lmks[8][1] - lmks[4][1]) < 0.05 and  math.fabs(lmks[8][2] - lmks[4][2]) < 0.05 
               and lmks[0][0] == 1): # 右手
@@ -139,17 +144,17 @@ def detect_heart_gesture(landmark_list):
         if ( (lmks[4][2] < lmks[12][2] and lmks[4][2] < lmks[16][2] and lmks[4][2] < lmks[20][2]) and  
              (lmks[8][2] < lmks[12][2] and lmks[4][2] < lmks[16][2] and lmks[4][2] < lmks[20][2]) and  
             # 中指，無名指，小指 順序
-             (lmks[12][1] > lmks[20][1]) and
+             (lmks[12][1] < lmks[20][1]) and
              #食指拇指相近
-            math.fabs(lmks[8][1] - lmks[4][1]) < 0.05 and  math.fabs(lmks[8][2] - lmks[4][2]) < 0.005#食指拇指交叉
+            math.fabs(lmks[8][1] - lmks[4][1]) < 0.05 and  math.fabs(lmks[8][2] - lmks[4][2]) < 0.05#食指拇指交叉
             and lmks[0][0] == 0): # 左手
                     left_action_count += 1
         #print (lmks[8][1] - lmks[4][1])         
     if right_action_count > len(landmark_list)/2 :
-        print ("right_heart count:{}".format(right_action_count))   
+        #print ("right_heart count:{}".format(right_action_count))   
         gestures.append("right_heart")
     if left_action_count > len(landmark_list)/2 :
-        print ("left_heart count:{}".format(left_action_count))   
+        #print ("left_heart count:{}".format(left_action_count))   
         gestures.append("left_heart")      
     
     return gestures
@@ -173,10 +178,10 @@ def detect_rock_gesture(landmark_list):
                     left_action_count += 1
         #print (math.fabs(lmks[4][1] - lmks[12][1]))         
     if right_action_count > len(landmark_list)/2 :
-        print ("right_rock count:{}".format(right_action_count))   
+        #print ("right_rock count:{}".format(right_action_count))   
         gestures.append("right_rock")
     if left_action_count > len(landmark_list)/2 :
-        print ("left_rock count:{}".format(left_action_count))   
+        #print ("left_rock count:{}".format(left_action_count))   
         gestures.append("left_rock")      
     
     return gestures
@@ -193,25 +198,25 @@ def detect_thumb_gesture(landmark_list):
         else : 
             left_landmark_count += 1
         if (lmks[4][2] < lmks[3][2] < lmks[5][2] < lmks[9][2] < lmks[13][2] <  lmks[17][2] 
-                and lmks[8][1] < lmks[6][1]  #食指向內彎
-                and lmks[20][1] < lmks[19][1]  #小指向內彎
+                and lmks[8][1] > lmks[6][1]  #食指向內彎
+                and lmks[20][1] > lmks[19][1]  #小指向內彎
                 and lmks[0][0] == 1): #右手
                     right_action_count += 1
         if (lmks[4][2] < lmks[3][2] < lmks[5][2] < lmks[9][2] < lmks[13][2] <  lmks[17][2] 
-                and lmks[8][1] > lmks[6][1] #食指向內彎
-                and lmks[20][1] > lmks[19][1]  #小指向內彎
+                and lmks[8][1] < lmks[6][1] #食指向內彎
+                and lmks[20][1] < lmks[19][1]  #小指向內彎
                 and lmks[0][0] == 0): #左手
                     left_action_count += 1
     if right_action_count > right_landmark_count/2 :
-        print ("right_thumbs_up count:{}".format(right_action_count))   
+        #print ("right_thumbs_up count:{}".format(right_action_count))   
         gestures.append("right_thumbs_up")
     if left_action_count > left_landmark_count/2 :
-        print ("left_thumbs_up count :{}".format(left_action_count))   
+        #print ("left_thumbs_up count :{}".format(left_action_count))   
         gestures.append("left_thumbs_up") 
         print ("left_thumbs_up count:{}".format(right_action_count)) 
     return gestures
 
-def detect_direction(img, landmark_list):
+def detect_direction(landmark_list):
     #系統參數
     #建議 0.1-0.15之間
     move_thres_x = 0.13
@@ -229,9 +234,9 @@ def detect_direction(img, landmark_list):
     (last_x,last_y) = landmark_list[0][fid][1], landmark_list[0][fid][2]
     for lmks in landmark_list[1:] :
         (x,y) = lmks[fid][1], lmks[fid][2]
-        if (x < last_x) :
-            right_count += 1 
         if (x > last_x) :
+            right_count += 1 
+        if (x < last_x) :
             left_count += 1
         if (y < last_y) :
             up_count += 1 
@@ -251,9 +256,9 @@ def detect_direction(img, landmark_list):
     move_range_y = max_y - min_y
 
     if left_count > right_count and move_range_x > move_thres_x :
-        gestures.append("left")
+        gestures.append("move_left")
     if left_count < right_count and move_range_x > move_thres_x :
-        gestures.append("right")
+        gestures.append("move_right")
     '''
     move_thres_y = 90
     move_thres_y = 0.19
@@ -262,5 +267,5 @@ def detect_direction(img, landmark_list):
     if up_count < down_count and move_range_y > move_thres_y :
         gestures.append("down")
     '''
-    print ("move range:x:{},y:{}".format(move_range_x,move_range_y))
+    #print ("move range:x:{},y:{}".format(move_range_x,move_range_y))
     return gestures

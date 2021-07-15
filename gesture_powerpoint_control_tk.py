@@ -11,7 +11,8 @@ from tool import selfie_segmentation
 import time
 import keyboard
 import queue
-from threading import Thread, Event
+from threading import Thread
+from threading import Event as ev
 
 # 設定 PYTHONPATH 為專案的根目錄
 
@@ -54,6 +55,31 @@ gesture_to_desc = {gk[0]:gk[2] for gk in gesture_keyborad}
 h,w,c = 0,0,0 # image height, width, channel
 window_w, window_h = 400, 300
 window_name = "AI CAM"
+
+
+
+import PIL
+from PIL import Image,ImageTk
+from tkinter import Tk, Label
+
+window_width = 400
+widow_height = 300
+root = Tk()
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+root.bind('<Escape>', lambda e: root.quit())
+appHeight = 140
+padding = 8
+left_padding = 300
+#geo_str = str(window_width) + "x" + str(widow_height) + "+"+ str(screen_width-window_width-30) +"+" + str(screen_height - widow_height -60)
+left_padding = 300
+geo_str = str(window_width) + "x" + str(widow_height) + "+"+ str(screen_width-window_width-30) +"+" + str(20)
+print (geo_str)
+root.geometry(geo_str)
+lmain = Label(root,background='white',borderwidth = 0, highlightthickness = 0)
+lmain.pack()
+
+
 def show_config():
     print("Window name:{}, screen_w:{}, screen_h:{}, window_w:{}, window_h:{}"
           .format(window_name,screen_w, screen_h,window_w, window_h))
@@ -68,21 +94,18 @@ def cv2ImgAddText(img, text, left, top, textColor=(255,100, 100,128),font_size=3
     #fs = ImageFont.truetype(font_path, font_size, encoding="utf-8")
     #, stroke_width=1, stroke_fill=stroke_color
     stroke_color = (255,255,255)
-    draw.text((left, top), text, textColor, font=fs, stroke_width=2, stroke_fill=stroke_color)
+    draw.text((left, top), text, textColor, font=fs, stroke_width=3, stroke_fill=stroke_color)
     #draw.text((left, top), text, textColor, font=fs)
     return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
 def show_video_window(name):   
     
     global window_w, window_h, screen_w, screen_h, window_name
-    cv2.moveWindow(window_name, int( (screen_w - window_w) * 0.97),-40)  # Move it to (40,30)  
-    #切換到Windows console 啟動螢幕解析度會被鎖
-    #cv2.moveWindow(name, 1280 - window_w -3,-35)  # Move it to (40,30)
-    #print ( cv2.getWindowImageRect(window_name))
+    #cv2.moveWindow(window_name, int( (screen_w - window_w) * 0.97),-40)  # Move it to (40,30)  
+    move_tk_window(int((screen_w - window_w) * 0.97),20) 
 def hide_video_window(name):
     global window_w, window_h, screen_w, screen_h, window_name
-    cv2.moveWindow(window_name, int( (screen_w - window_w) * 0.97),-500) # Move it to invisible area
-    #print ( cv2.getWindowImageRect(window_name))nq
-    #cv2.moveWindow(name, 2000,-500)  # Move it to (40,30)
+    #cv2.moveWindow(window_name, int( (screen_w - window_w) * 0.97),-500) # Move it to invisible area
+    move_tk_window(int( (screen_w - window_w) * 0.97),-500)
 def hide_control_panel():
     global hand_status, window_countdown_status, window_hidden_countdown, window_show_countdown
     if hand_status == 1 : #原本有手變沒手
@@ -119,12 +142,12 @@ def show_gesture_label(img, font_size=35):
         # cv2.putText(img, gesture_status_label, (20, 70), cv2.FONT_HERSHEY_DUPLEX, 2.5, (100, 100, 255),3)
         #RGBA 
         '''
-        213,12,30
-        69,151,38
-        0,107,178
+        213,12,30 R
+        69,151,38 G
+        0,107,178 B
         '''
         left = 30
-        top = 45
+        top = 50
         if gesture_status_label in gesture_to_desc:
             img = cv2ImgAddText(img, gesture_to_desc[gesture_status_label], left, top,(0,107,178,2),font_size=font_size)
         else :
@@ -188,9 +211,9 @@ def detect_gestures():
     gestures += gesture_detector.detect_heart_gesture(landmark_list)
     gestures += gesture_detector.detect_thumb_gesture(landmark_list)
     #gestures += gesture_detector.detect_click_area(landmark_list)
-    gestures += gesture_detector.detect_click_gesture(landmark_list)
+    #gestures += gesture_detector.detect_click_gesture(landmark_list)
     #gestures += gesture_detector.detect_direction(landmark_list)
-    print(gesture_detector.detect_click_gesture(landmark_list))
+    #print(gesture_detector.detect_click_gesture(landmark_list))
     if len(gestures) > 0 and check_time - last_gesture_detect > dup_action_thres:
         keyboard_actions = gestures_to_keyboard(gestures)
         for k in keyboard_actions :
@@ -203,7 +226,16 @@ def detect_gestures():
         for g in gestures :
             gesture_queue.put(g)
     finger_queue.queue.clear()
-    
+def image_transparent(image_rgba):
+    newImage = []
+    for item in image_rgba.getdata():
+        if item[:3] == (255, 255, 255):
+            newImage.append((255, 255, 255, 0))
+        else:
+            newImage.append(item)
+
+    image_rgba.putdata(newImage)
+    return image_rgba    
 def detect_gesture_sequence():
     """
     檢查 finger_queue 內是否有特殊的 手勢
@@ -218,99 +250,94 @@ def detect_gesture_sequence():
         keyboard.press_and_release("3+enter")
         gesture_status_label = "跳頁"
         gesture_queue.queue.clear()
-    
+def move_tk_window(x,y):
+    geo_str = str(window_width) + "x" + str(widow_height) + "+"+ str(x) +"+" + str(y)    
+    root.geometry(geo_str)
 class GustureMonitorThread(Thread):
     
     # 專門監控是否有特殊手勢的 Thread
-    def __init__(self, event, interval):
+    def __init__(self, event, interval, thread_type):
         Thread.__init__(self)
         self.stopped = event
         self.interval = interval
+        self.thread_type = thread_type
 
     def run(self):          
-        while not self.stopped.wait(self.interval):          
-            if finger_queue.qsize() > 3  :            
-                detect_gestures()  # 偵測 single gesture
-                detect_gesture_sequence() #偵測連續 gesture sequence
-            # call a function
+        while not self.stopped.wait(self.interval):
+            if self.thread_type == "g"    :      
+                if finger_queue.qsize() > 3  :            
+                    detect_gestures()  # 偵測 single gesture
+                    detect_gesture_sequence() #偵測連續 gesture sequence
+            if self.thread_type == "f" :         
+                show_frame()
 
+img_count = 0
+st = time.time()
+def show_frame():    
+    global img_count,st
+    fps_unit = 300 
+    success, img = cap.read()
+    if not success :
+        return
+    img_count +=1 
+    #
+    #img = cv2.resize(img,((int(window_width/4), int(widow_height/4))))
+    #
+    img = cv2.flip(img, 1)
+    # 處理手勢偵測
+    img = detector.find_hands(img, draw=True)
+        # 取得 手的 landmarks , hand_label 
+        #lmslist = detector.find_two_positions(img)
+    lmslist = detector.find_positions(img)
+        # 手指特徵抽取h
+        # 將手指特徵放到 queue 內，並顯示手指畫面
+    store_finger_features(img, lmslist)
+    #處理 opencv img 邏輯
+    img = selfie_segmentation.image_selfie_segmentation_bg(img) 
+    #output_image = cv2.resize(output_image, (window_width, widow_height)) 
+    base_font_size = 80
+    img = show_gesture_label(img,font_size=base_font_size)
+    #處理 tkinter GUI 邏輯
+    cv2image = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)    
+    img = PIL.Image.fromarray(cv2image)
+    #img = image_transparent(img)
+    img = img.resize((window_width, widow_height))
+    imgtk = ImageTk.PhotoImage(image=img)
+    lmain.imgtk = imgtk
+    lmain.configure(image=imgtk)
+    lmain.after(40, show_frame)
+    if (img_count % fps_unit == 0) :
+        et = time.time()
+        fps = img_count /(et-st)
+        print ("image fps:{}".format(fps))
+        img_count = 0
+        st = et
+        #print("fps:{}".format(1/(et-st))) 
+    
 if __name__ == "__main__" :     
     # 產生一個 Thread 專門監控是否有特殊手勢
     global window_mode
     gesture_monitor_interval = 0.35          
-    stop_thread_flag = Event()
-    gesture_thread = GustureMonitorThread(stop_thread_flag, interval = gesture_monitor_interval)
+    stop_thread_flag = ev()
+    gesture_thread = GustureMonitorThread(stop_thread_flag, gesture_monitor_interval,thread_type="g")
     gesture_thread.start()
     # 打開 Web cam
     cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 3); 
     #cap = cv2.VideoCapture(0, cv2.CAP_DSHOW) #captureDevice = camera
     # 讀取 video frame
-    img_count = 0
-    fps_unit = 500 
-    st = time.time()
-    while cap.isOpened() :
-        success, img = cap.read()
-        h, w, c = img.shape
-        img_count += 1
-        if success:
-            # horizontal flip image 
-            img = cv2.flip(img,1)
-            # 檢測手 
-            img = detector.find_hands(img, draw=True)
-            # 取得 手的 landmarks , hand_label 
-            #lmslist = detector.find_two_positions(img)
-            lmslist = detector.find_positions(img)
-            # 手指特徵抽取h
-            # 將手指特徵放到 queue 內，並顯示手指畫面
-            store_finger_features(img, lmslist)
-            #  
-        #cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
-        #cv2.setWindowProperty(window_name,cv2.WND_PROP_FULLSCREEN,0) 
-        
-        #image manipulations
-        
-        img = selfie_segmentation.image_selfie_segmentation(img)
-        
-        base_font_size = 40
-        img = cv2.resize(img, (window_w, window_h))  
-        if (window_display_mode  == "A" or  window_display_mode  == "H") : 
-            img = show_gesture_label(img,font_size=base_font_size)
-            cv2.imshow(window_name, img)
-            #always on top      
-            cv2.setWindowProperty(window_name, cv2.WND_PROP_TOPMOST, 1)  
-        #elif (window_display_mode  == "P"):
-            
-        else :
-            img = show_gesture_label(img,font_size=int(base_font_size*(h/window_h)))
-            cv2.imshow(window_name, img)
-            
-        k = cv2.waitKey(1)
-        if k == ord("q") : #Quit
-            break
-        if k == ord("a") : #Change window display mode
-            window_display_mode  = "A"
-            print ("change window mode: Auto Show")            
-            hide_video_window(window_name)
-        if k == ord("h") : #Change window display mode
-            window_display_mode  = "H"
-            print ("change window mode: Hide")
-            hide_video_window(window_name)
-        if k == ord("n") :
-            window_display_mode  = "N"
-            print ("change window mode: Normal")
-            cv2.moveWindow(window_name, int( (screen_w/2 - window_w) ),10)  # Move it to (40,30)
-            
-        if cv2.getWindowProperty(window_name,cv2.WND_PROP_VISIBLE) < 1 :
-            break
-        # 計算 FPS
-        if (img_count % fps_unit == 0) :
-            et = time.time()
-            fps = img_count /(et-st)
-            print ("image fps:{}".format(fps))
-            img_count = 0
-            st = et
-        #print("fps:{}".format(1/(et-st)))    
+    '''
+    frame_ana_interval = 0.03          
+    stop_frame_thread_flag = ev()
+    frame_thread = GustureMonitorThread(stop_frame_thread_flag,frame_ana_interval,thread_type="f")
+    frame_thread.start()
+    '''
+    show_frame()
+    root.wm_attributes('-transparentcolor','white')
+    root.overrideredirect(True)
+    root.attributes('-topmost', True)
+    root.mainloop() 
     stop_thread_flag.set()  # 停止Thread
     cap.release()
-    cv2.destroyAllWindows()
+    
 

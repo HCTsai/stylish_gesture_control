@@ -73,11 +73,9 @@ class HandDetector():
             # account for inversion in webcams
             hand_id = 0
             if hand_label == "Left":
-                hand_label = "Right"
-                hand_id = 1 #右手 
+                hand_id = 0 #左手 
             elif hand_label == "Right":
-                hand_label = "Left"   
-                hand_id = 0  #左手 0
+                hand_id = 1  #右手 1
             #print ("hand label:{}".format(hand_label))
             hand = self.results.multi_hand_landmarks[hand_no]            
             for id, lm in enumerate(hand.landmark):
@@ -102,12 +100,10 @@ class HandDetector():
                 # label gives if hand is left or right
                 #account for inversion in webcams
                 hand_id = 0
-                if hand_label == "Left":
-                    hand_label = "Right"
-                    hand_id = 1 #右手 
+                if hand_label == "Left":                    
+                    hand_id = 0 #左手 
                 elif hand_label == "Right":
-                    hand_label = "Left"   
-                    hand_id = 0  #左手 0  
+                    hand_id = 1  #左手 0  
                 for id, lm in enumerate(hand.landmark):                    
                         cx, cy = lm.x, lm.y                                      
                         self.lmslist.append([hand_id, cx, cy])  
