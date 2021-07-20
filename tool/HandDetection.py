@@ -15,9 +15,11 @@ import mediapipe as mp
 ##drawing style, BGR system
 mark_draw_spec = mp.solutions.drawing_utils.DrawingSpec()
 conn_draw_spec = mp.solutions.drawing_utils.DrawingSpec()
-mark_draw_spec.color = (30, 12, 213)
-mark_draw_spec.thickness =3
+#mark_draw_spec.color = (30, 12, 213)
+mark_draw_spec.color = (60, 32, 233)
+mark_draw_spec.thickness =1
 conn_draw_spec.color = (38, 151, 69)
+conn_draw_spec.thickness =1
 class HandDetector():
     '''
     手勢識別

@@ -269,7 +269,7 @@ if __name__ == "__main__" :
         
         #image manipulations
         
-        img = selfie_segmentation.image_selfie_segmentation(img)
+        img = selfie_segmentation.image_selfie_segmentation(img,stype="blur")
         
         base_font_size = 40
         img = cv2.resize(img, (window_w, window_h))  
