@@ -15,15 +15,11 @@ def detect_finger_count(img, landmark_list, hand_label):
     for tid in tip_ids:
         # 找到每個指尖的位置
         x, y = int(landmark_list[tid][1] * w), int(landmark_list[tid][2] *h)
-        if (tid == 8)  :
-            #print ("食指位置:{},{}".format(x,y))
-            #finger_queue.put((lmslist[tid][1],lmslist[tid][2]))
-            pass
-        cv2.circle(img, (x, y), 10, (0, 255, 0), cv2.FILLED)
+        #cv2.circle(img, (x, y), 10, (0, 255, 0), cv2.FILLED)
         # 如果是大拇指，如果大拇指指尖x位置大於大拇指第二關節的位置，則認為大拇指打開，否則認為大拇指關閉
         # 還要判斷手
         if tid == 4 :
-            if hand_label == "Right" :
+            if hand_label == 1 : #右手
                 if landmark_list[tid][1] < landmark_list[tid - 1][1]:
                     fingers.append(1)
                 else:
@@ -42,7 +38,33 @@ def detect_finger_count(img, landmark_list, hand_label):
     # fingers是这样一个列表，5个数据，0代表一个手指关闭，1代表一个手指打开
     # 判断有几个手指打开
     finger_count  = fingers.count(1)
-    return finger_count
+    return finger_count, fingers
+
+def get_mouse_gesture(fingers):
+    gesture = ""    
+    if fingers == [0,1,0,0,0] or fingers == [1,1,0,0,0] :
+        gesture = "pointer"
+    if fingers == [0,1,1,0,0 ]or fingers == [1,1,1,0,0] :
+        gesture = "scissor"
+# totalFingers = fingers.count(1)
+    return gesture 
+
+def findDistance(lmslist, p1, p2, img, draw=True, r=9, t=2):
+    h,w,c = img.shape
+    x1, y1 = lmslist[p1][1:]
+    x2, y2 = lmslist[p2][1:]
+    x1 = int(x1 * w) 
+    y1 = int(y1 * h) 
+    x2 = int(x2 * w) 
+    y2 = int(y2 * h) 
+    cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
+    if draw:
+        cv2.line(img, (x1, y1), (x2, y2), (255, 0, 255), t)
+        cv2.circle(img, (x1, y1), r, (255, 0, 255), cv2.FILLED)
+        cv2.circle(img, (x2, y2), r, (255, 0, 255), cv2.FILLED)
+        cv2.circle(img, (cx, cy), r, (0, 0, 255), cv2.FILLED)
+    length = math.hypot(x2 - x1, y2 - y1)
+    return length, img, [x1, y1, x2, y2, cx, cy]   
 def get_area(x,y):
     
     index_y = int(y/0.333) 
@@ -213,7 +235,7 @@ def detect_thumb_gesture(landmark_list):
     if left_action_count > left_landmark_count/2 :
         #print ("left_thumbs_up count :{}".format(left_action_count))   
         gestures.append("left_thumbs_up") 
-        print ("left_thumbs_up count:{}".format(right_action_count)) 
+        #print ("left_thumbs_up count:{}".format(right_action_count)) 
     return gestures
 
 def detect_direction(landmark_list):
