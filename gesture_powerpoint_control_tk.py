@@ -17,7 +17,6 @@ from tool import mouse_control
 
 
 # 設定 PYTHONPATH 為專案的根目錄
-
 # 輸出中文
 # Noto Sans CJK TC https://www.google.com/get/noto/#sans-hant
 import numpy as np
@@ -30,8 +29,6 @@ detector = HandDetection.HandDetector()
 # 用來顯示最近偵測到的手勢
 gesture_status_label = ""
 gesture_hide_countdown = 10
-
-
 # 用來動態 顯示 關閉 視窗
 hand_status = 0
 window_countdown_status = False
@@ -60,15 +57,21 @@ window_name = "AI CAM"
 
 play_mode = "N"
 hide_status = False
-gesture_detect_status = True
+gesture_detect_status = False
 mouse_control_status = True
 
 import PIL
 from PIL import Image,ImageTk
 from tkinter import Tk, Label
 
-window_width =  int(640  * 0.8)
-window_height = int(480  * 0.8)
+#16:9
+camera_w = 640
+camera_h = 480
+
+
+window_width =  int(camera_w  * 0.65)
+window_height = int(camera_h  * 0.65)
+
 root = Tk()
 screen_w = root.winfo_screenwidth()
 screen_h = root.winfo_screenheight()
@@ -187,16 +190,19 @@ def show_gesture_label(img, font_size=35):
             #gesture_countdown_status = FALSE
             gesture_status_label = ""
     return img
-
+def process_auto_window(lmslist):
+    if len(lmslist) > 0:
+            show_control_panel()
+    else :
+            hide_control_panel()
+        
+    
 def store_finger_features(img, lmslist):
     global h, w, c , gesture_status_label, font, hand_status
     global window_countdown_status, window_heightidden_countdown, window_show_countdown
     global play_mode
     if len(lmslist) > 0:
         finger_queue.put(lmslist)
-        if (play_mode  == "Auto") :
-            show_control_panel()
-        
         # 顯示手指
         # cnt = gesture_detector.detect_finger_count(img, lmslist, hand_label)
         # 文字/左上角座標/字體/字體大小scale/顏色/字体粗細
@@ -208,11 +214,7 @@ def store_finger_features(img, lmslist):
         img = np.array(img_pil)
         '''
         #
-        #cv2.moveWindow("AI CAM", 1500,-40)  # Move it to (40,30)
-    else : # 畫面沒有手。開始倒數，倒數結束關閉視窗
-        if (play_mode  == "Auto") :
-            hide_control_panel()
-    #    cv2.moveWindow("AI CAM", 2500,-40)  # Move it to (40,30)
+       
    
         
 def gestures_to_keyboard(gestures):
@@ -303,7 +305,7 @@ img_count = 0
 st = time.time()
 def get_frame():    
     global img_count, st, play_mode
-    fps_unit = 300 
+    fps_unit = 250 
     success, img = cap.read()
     if not success :
         return
@@ -311,21 +313,24 @@ def get_frame():
     img = cv2.flip(img, 1)    #
     
     #處理手勢偵測
-    if gesture_detect_status :
-        img = detector.find_hands(img, draw=True)
-        lmslist = detector.find_positions(img)     
+    img = detector.find_hands(img, draw=True)  
+    lmslist = detector.find_positions(img)  
+    if gesture_detect_status :     
         store_finger_features(img, lmslist)
-        
+    if play_mode == "Auto" :
+        process_auto_window(lmslist)    
             
-    img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
+    #img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
     if (not hide_status) and (play_mode != "Normal") :
         #處理 opencv img 邏輯
-        
+        #img = selfie_segmentation.image_selfie_segmentation(img) 
+        #img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
         img = selfie_segmentation.image_selfie_segmentation(img,stype="") 
-    
+    else:
+        img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
     if mouse_control_status :
         mouse_control.control_mouse(cv2, img, lmslist)
-    #img = selfie_segmentation.image_selfie_segmentation(img) 
+  
     #output_image = cv2.resize(output_image, (window_widthidth, widow_height)) 
     base_font_size = 80
     img = show_gesture_label(img,font_size=base_font_size)
@@ -357,7 +362,7 @@ def change_play_mode():
         root.overrideredirect(True)    
         root.wm_attributes('-transparentcolor','white')        
         show_video_window()
-        #if cap == None:
+        #if cap == None:a
         #    cap = cv2.VideoCapture(0)
         print ("change mode:{}".format(play_mode))
     if change_type == "Title" :
@@ -408,7 +413,7 @@ def keyboard_process(k):
             print ("change gesture status:{}".format(gesture_detect_status))
         if k.name == "c" :
             mouse_control_status = not mouse_control_status          
-            print ("change mouse status:{}".format(gesture_detect_status))    
+            print ("change mouse status:{}".format(mouse_control_status))    
         if k.name == "a" :
             play_mode = "Auto"          
             hide_video_window()
@@ -425,6 +430,9 @@ if __name__ == "__main__" :
     # 打開 Web cam
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 3); 
+    # 設定camera resolutiona
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, camera_w)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, camera_h)
     #cap = cv2.VideoCapture(0, cv2.CAP_DSHOW) #captureDevice = camera
     # 讀取 video frame
     '''

@@ -40,16 +40,21 @@ def detect_finger_count(img, landmark_list, hand_label):
     finger_count  = fingers.count(1)
     return finger_count, fingers
 
-def get_mouse_gesture(fingers):
+def get_finger_gesture(fingers):
     gesture = ""    
     if fingers == [0,1,0,0,0] or fingers == [1,1,0,0,0] :
         gesture = "pointer"
+    #Rock paper scissors
     if fingers == [0,1,1,0,0 ]or fingers == [1,1,1,0,0] :
-        gesture = "scissor"
+        gesture = "scissor"    
+    if fingers == [0,0,0,0,0 ]:
+        gesture = "rock"
+    if fingers == [1,1,1,1,1 ]:
+        gesture = "paper"
 # totalFingers = fingers.count(1)
     return gesture 
 
-def findDistance(lmslist, p1, p2, img, draw=True, r=9, t=2):
+def find_distance(lmslist, p1, p2, img, draw=True, r=4, t=2):
     h,w,c = img.shape
     x1, y1 = lmslist[p1][1:]
     x2, y2 = lmslist[p2][1:]
@@ -64,7 +69,20 @@ def findDistance(lmslist, p1, p2, img, draw=True, r=9, t=2):
         cv2.circle(img, (x2, y2), r, (255, 0, 255), cv2.FILLED)
         cv2.circle(img, (cx, cy), r, (0, 0, 255), cv2.FILLED)
     length = math.hypot(x2 - x1, y2 - y1)
-    return length, img, [x1, y1, x2, y2, cx, cy]   
+    return length, img, [x1, y1, x2, y2, cx, cy]  
+def find_center(lmslist, point_ids, img, draw=True, r=4, t=2):
+    h,w,c = img.shape
+    x_sum = 0
+    y_sum = 0
+    for pid in point_ids :         
+        x1, y1 = lmslist[pid][1:]
+        x_sum += x1
+        y_sum += y1
+    avg_x, avg_y = int(x_sum/len(point_ids)), int(y_sum/len(point_ids))    
+    px, py  = int(avg_x*w), int(avg_y*h)   
+    if draw:       
+        cv2.circle(img, (px, py), r, (0, 0, 255), cv2.FILLED)
+    return img, px, py 
 def get_area(x,y):
     
     index_y = int(y/0.333) 

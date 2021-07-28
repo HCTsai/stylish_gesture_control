@@ -48,13 +48,14 @@ def image_selfie_segmentation(image, stype="blur"):
     
     if stype == "blur" :
         bg_image = cv2.GaussianBlur(image,(53,53),0)
-        bg_image = increase_brightness(bg_image, value=10)
+        #bg_image = increase_brightness(bg_image, value=10)
         output_image = np.where(condition, image, bg_image)
         output_image = increase_brightness(output_image, value=35)
     if bg_image is None:
         bg_image = np.zeros(image.shape, dtype=np.uint8)
         bg_image[:] = BG_COLOR
-        output_image = np.where(condition, image, bg_image)       
+        output_image = np.where(condition, image, bg_image)
+        #output_image = increase_brightness(output_image, value=35)       
     return output_image
 
 
@@ -67,9 +68,9 @@ if __name__ == "__main__" :
     while cap.isOpened():
         success, image = cap.read()
         if not success:
-          print("Ignoring empty camera frame.")
-          # If loading a video, use 'break' instead of 'continue'.
-          continue
+            print("Ignoring empty camera frame.")
+            # If loading a video, use 'break' instead of 'continue'.
+            continue
         image = cv2.flip(image, 1)
         output_image = image_selfie_segmentation(image,stype="blur") 
         output_image = image_selfie_segmentation(output_image,stype="") 
