@@ -51,6 +51,8 @@ def get_finger_gesture(fingers):
         gesture = "rock"
     if fingers == [1,1,1,1,1 ]:
         gesture = "paper"
+    if fingers == [0,1,1,1,0] :
+        gesture = "three"
 # totalFingers = fingers.count(1)
     return gesture 
 

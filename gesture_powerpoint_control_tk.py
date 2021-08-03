@@ -14,7 +14,7 @@ import queue
 from threading import Thread
 from threading import Event as ev
 from tool import mouse_control
-
+import autopy
 
 # 設定 PYTHONPATH 為專案的根目錄
 # 輸出中文
@@ -57,8 +57,10 @@ window_name = "AI CAM"
 
 play_mode = "N"
 hide_status = False
+
 gesture_detect_status = False
 mouse_control_status = True
+keyboard_monitor_status = True
 
 import PIL
 from PIL import Image,ImageTk
@@ -69,8 +71,8 @@ camera_w = 640
 camera_h = 480
 
 
-window_width =  int(camera_w  * 0.65)
-window_height = int(camera_h  * 0.65)
+window_width =  int(camera_w  * 0.6)
+window_height = int(camera_h  * 0.6)
 
 root = Tk()
 screen_w = root.winfo_screenwidth()
@@ -283,6 +285,7 @@ def detect_gesture_sequence():
 def move_tk_window(x,y):
     geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(x) +"+" + str(y)    
     root.geometry(geo_str)
+    print ("move window: x:{} y:{}".format(x,y))
 class GustureMonitorThread(Thread):
     
     # 專門監控是否有特殊手勢的 Thread
@@ -303,40 +306,53 @@ class GustureMonitorThread(Thread):
 
 img_count = 0
 st = time.time()
+
+
+
 def get_frame():    
     global img_count, st, play_mode
+    global gesture_status_label
     fps_unit = 250 
     success, img = cap.read()
+    
     if not success :
         return
     img_count +=1   
+    #直接從camera 設定圖片大小
+    img = cv2.resize(img, (window_width, window_height)) 
     img = cv2.flip(img, 1)    #
+   
     
     #處理手勢偵測
-    img = detector.find_hands(img, draw=True)  
+    img = detector.find_hands(img, draw=False)  
     lmslist = detector.find_positions(img)  
     if gesture_detect_status :     
         store_finger_features(img, lmslist)
     if play_mode == "Auto" :
         process_auto_window(lmslist)    
-            
+    if mouse_control_status :
+        label_text = mouse_control.control_mouse(cv2, img, lmslist)
+        if (label_text !="") :
+            gesture_status_label = label_text        
     #img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
     if (not hide_status) and (play_mode != "Normal") :
         #處理 opencv img 邏輯
         #img = selfie_segmentation.image_selfie_segmentation(img) 
         #img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
         img = selfie_segmentation.image_selfie_segmentation(img,stype="") 
-    else:
-        img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
-    if mouse_control_status :
-        mouse_control.control_mouse(cv2, img, lmslist)
-  
+    #else:
+        #img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
+    
+    
     #output_image = cv2.resize(output_image, (window_widthidth, widow_height)) 
+   
     base_font_size = 80
     img = show_gesture_label(img,font_size=base_font_size)
     #處理 tkinter GUI 邏輯
     cv2image = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)    
     img = PIL.Image.fromarray(cv2image)
+    #img = Image.open("img/png/robot.png").convert("RGBA")
+    #pixels = img.load()
     #img = image_transparent(img)
     img = img.resize((window_width, window_height))
     imgtk = ImageTk.PhotoImage(image=img)
@@ -351,11 +367,15 @@ def get_frame():
         img_count = 0
         st = et
         #print("fps:{}".format(1/(et-st)))
+        
+    #logging 
+    
+        
 play_mode_list = ["Trans","Title", "Normal"] 
 change_mode_index = 1 
 def change_play_mode():
     global play_mode, play_mode_list, change_mode_index
-    global hide_status 
+    global hide_status
     change_type = play_mode_list[change_mode_index % len(play_mode_list)]
     if change_type == "Trans" :
         play_mode = "Trans"
@@ -379,45 +399,74 @@ def change_play_mode():
         show_video_window()   
         hide_status = False 
         print ("change mode:{}".format(play_mode))
-    change_mode_index +=1 
-    
+    change_mode_index +=1     
+    hide_status = False
 def keyboard_process(k):
     global window_width, window_height, screen_w, screen_h, window_name,window_x, window_y
-    global play_mode, gesture_detect_status, mouse_control_status
-    scale = 20
+    global play_mode, gesture_detect_status, mouse_control_status, keyboard_monitor_status
+    scale = 30
     move_x = int(screen_w / scale)
     move_y = int(screen_h / scale)
     if (k.event_type == "down") :
-        if k.name == "i" :
-            window_y -= move_y
-        if k.name == "k" :
-            window_y += move_y
-        if k.name == "l" :
-            window_x += move_x
-        if k.name == "j" :
-            window_x -= move_x   
-        move_tk_window(window_x, window_y)
-        if k.name == "m" :            
-            change_play_mode()
-        if k.name == "h" :            
-            play_mode = "H"
-            hide_video_window()
-            root.overrideredirect(False)
-            root.wm_attributes('-transparentcolor',"")        
-            #不關閉Camera 因為啟動太慢
-            #cap.release()
-            #cap = None
-            print ("change mode:{}".format(play_mode))
-        if k.name == "g" :
-            gesture_detect_status = not gesture_detect_status          
-            print ("change gesture status:{}".format(gesture_detect_status))
-        if k.name == "c" :
-            mouse_control_status = not mouse_control_status          
-            print ("change mouse status:{}".format(mouse_control_status))    
-        if k.name == "a" :
-            play_mode = "Auto"          
-            hide_video_window()
-            print ("change mode:{}".format(play_mode))
+        print (k.name)
+        if k.name == "ctrl" :
+            keyboard_monitor_status = not keyboard_monitor_status
+            print ("change keyboard monitor status:{}".format(keyboard_monitor_status))
+        if keyboard_monitor_status:
+            if k.name == "i" :
+                window_y -= move_y
+            if k.name == "k" :
+                window_y += move_y
+            if k.name == "l" :
+                window_x += move_x
+            if k.name == "j" :
+                window_x -= move_x   
+            move_tk_window(window_x, window_y)
+            #
+            if k.name == "w" :
+                window_x, window_y = 674, 305
+                move_tk_window(window_x, window_y)
+            #
+            if k.name == "m" :            
+                change_play_mode()
+            if k.name == "h" :            
+                play_mode = "H"
+                root.wm_attributes('-transparentcolor',"")
+                root.overrideredirect(False)  
+                hide_video_window()
+                #不關閉Camera 因為啟動太慢
+                #cap.release()
+                #cap = None
+                print ("change mode:{}".format(play_mode))
+            if k.name == "g" :
+                gesture_detect_status = not gesture_detect_status          
+                print ("change gesture status:{}".format(gesture_detect_status))
+            if k.name == "c" :
+                mouse_control_status = not mouse_control_status          
+                print ("change mouse status:{}".format(mouse_control_status))    
+            if k.name == "a" :
+                play_mode = "Auto"          
+                hide_video_window()
+                print ("change mode:{}".format(play_mode))
+            if k.name == "z" :
+                print ("{}".format(len(mouse_control.movement_list)))
+                list_to_file(mouse_control.movement_list,file_name="move.txt")
+                mouse_control.movement_list = []
+                print ("store record")
+            if k.name == "print screen" :
+                timestr = time.strftime("%Y%m%d-%H%M%S")
+                autopy.bitmap.capture_screen().save("img/screenshot/screen-{}.png".format(timestr))
+                print ("save screenshot")
+
+def list_to_file(list_name,file_name):
+    with open(file_name,"w",encoding="utf-8") as of:
+        for r in list_name :
+            of.write(str(r) + "\n")
+            
+    with open ("hist.txt","w",encoding="utf-8") as of :
+        hist, bins=np.histogram(np.array(list_name),bins=np.linspace(0,1280,128))
+        for i, h in enumerate(hist) : 
+            of.write(str(h) +"\t" + str(bins[i])  + "\n")
 def keyboard_monitor(type):
     keyboard.hook(keyboard_process)    
 if __name__ == "__main__" :     
@@ -431,8 +480,8 @@ if __name__ == "__main__" :
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 3); 
     # 設定camera resolutiona
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, camera_w)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, camera_h)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, window_width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, window_height)
     #cap = cv2.VideoCapture(0, cv2.CAP_DSHOW) #captureDevice = camera
     # 讀取 video frame
     '''

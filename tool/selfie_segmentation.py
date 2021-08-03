@@ -21,6 +21,7 @@ def increase_brightness(img, value=30):
     final_hsv = cv2.merge((h, s, v))
     img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
     return img
+BG_COLOR = (255, 255, 255) # gray
 def image_selfie_segmentation(image, stype="blur"):
     bg_image = None
     # Flip the image horizontally for a later selfie-view display, and convert
@@ -30,10 +31,8 @@ def image_selfie_segmentation(image, stype="blur"):
     # pass by reference.
     image.flags.writeable = False
     results = selfie_segmentation.process(image)
-
     image.flags.writeable = True
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
     # Draw selfie segmentation on the background image.
     # To improve segmentation around boundaries, consider applying a joint
     # bilateral filter to "results.segmentation_mask" with "image".
@@ -44,21 +43,17 @@ def image_selfie_segmentation(image, stype="blur"):
     #      be the background, e.g., bg_image = cv2.imread('/path/to/image/file')
     #   b) Blur the input image by applying image filtering, e.g.,
     #      bg_image = cv2.GaussianBlur(image,(55,55),0)
-    BG_COLOR = (255, 255, 255) # gray
-    
     if stype == "blur" :
-        bg_image = cv2.GaussianBlur(image,(53,53),0)
+        bg_image = cv2.GaussianBlur(image,(13,13),0)
         #bg_image = increase_brightness(bg_image, value=10)
         output_image = np.where(condition, image, bg_image)
-        output_image = increase_brightness(output_image, value=35)
+        output_image = increase_brightness(output_image, value=20)
     if bg_image is None:
         bg_image = np.zeros(image.shape, dtype=np.uint8)
         bg_image[:] = BG_COLOR
         output_image = np.where(condition, image, bg_image)
-        #output_image = increase_brightness(output_image, value=35)       
+        output_image = increase_brightness(output_image, value=20)       
     return output_image
-
-
 if __name__ == "__main__" :     
     # For webcam input:
     BG_COLOR = (255, 255, 255) # gray
