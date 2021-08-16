@@ -71,8 +71,8 @@ camera_w = 640
 camera_h = 480
 
 
-window_width =  int(camera_w  * 0.7)
-window_height = int(camera_h  * 0.7)
+window_width =  int(camera_w  * 1)
+window_height = int(camera_h  * 1)
 
 root = Tk()
 screen_w = root.winfo_screenwidth()
