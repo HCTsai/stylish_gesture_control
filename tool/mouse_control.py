@@ -39,6 +39,13 @@ p_fs_y = 240
 movement_list = []
 filter = "weight_speed"
 
+        
+import queue
+mouse_gesture_list = []
+
+    
+
+
 def init_mouse_control(w,h):
     global cam_w, cam_h
     global mouse_status , last_left_click_time , left_press_down_time
@@ -128,12 +135,10 @@ def release_mouse():
     # 需要根據滑鼠按下的時間狀態，決定是否 click or draging 意圖
     out_text = ""
     mouse_click_duration = time.time() - left_press_down_time 
-    if mouse_click_duration > 0.05 and mouse_click_duration < click_time_thres :
-        print ("This is click action")
-        if time.time() - auto_click_time > 0.5 :
-            # mouse.click() 與 滑鼠 click 行為有時會不同
-            autopy.mouse.click() #
-            auto_click_time = time.time()
+    if mouse_click_duration > 0.05  :
+        #print ("This is click action")
+        if mouse_click_duration < click_time_thres :
+            # autopy.mouse.click() #
             out_text  = "click"
         else :
             print ("This is dragging action")
@@ -183,6 +188,9 @@ def control_mouse(cv2, img, lmslist):
         # Step: Index finger pointing or mouse dragging
         #if fingers[1] == 1 and fingers[2] == 0:
         gesture = gesture_detector.get_finger_gesture(fingers) 
+        
+       
+        
         # 移動corsor 或 drag
         if ((gesture == "pointer") or 
             (gesture == "scissor" and mouse_status =="left_down" and time.time() - left_press_down_time > click_time_thres )):
@@ -223,13 +231,15 @@ def control_mouse(cv2, img, lmslist):
             # length, img, [x1, y1, x2, y2, cx, cy]
             # Step10: Click mouse if distance short
             length, img, lineInfo = gesture_detector.find_distance(lmslist, 8, 12, img,draw=False, r=4)
-            if length < click_dist_thres and time.time() - last_left_click_time > 1.0 and  mouse_status == "" :
+            if length < click_dist_thres and  mouse_status == "" and time.time() - last_left_click_time > 1.0  :
             #if time.time() - last_left_click_time > 1.0 and  mouse_status == "" :
                 print ("press mouse left")
                 #img, px, py = gesture_detector.find_center(lmslist, [4,8,12,16,20], img=img, draw=False)
                 #cv2.circle(img, (px, py), 4, (0, 255, 0), cv2.FILLED)
-                #autopy.mouse.click() 自動按下滑鼠左鍵不放
+                #autopy.mouse.click() 自動按下滑鼠左鍵不放                
+                
                 autopy.mouse.toggle(button=autopy.mouse.Button.LEFT,down=True)
+                
                 mouse_status = "left_down"                
                 last_left_click_time = time.time()
                 left_press_down_time = time.time()
@@ -240,8 +250,10 @@ def control_mouse(cv2, img, lmslist):
         if gesture == "three" :
             if time.time() - last_right_click_time > 1.0 and  mouse_status == "" : 
                 mouse_status = "right_down"  
+                
                 autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT,down=True) 
-                autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT,down=False)                       
+                autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT,down=False)  
+                                     
                 last_right_click_time = time.time()
                 mouse_status = ""  
                 print (mouse_status)
@@ -265,4 +277,5 @@ def control_mouse(cv2, img, lmslist):
                 #回復原始狀態
                 mouse_status = ""
         '''
-    return label_text
+    return ""
+    #return label_text

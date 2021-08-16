@@ -7,8 +7,8 @@ import statistics
 # Create an empty frame and define (700, 700, 3) drawing area
 frame = np.ones((1080, 1920, 3), np.uint8) 
 frame *= 255 #white background
-#draw virtual button 
 
+#draw button
 def draw_button(x1=int(1920*(2/3)),x2=int(1920*(2/3))+50,y1=int(1080*(2/3)),y2=int(1080*(2/3))+50):
     for y, row in enumerate(frame) :
         for x, col in enumerate(row) :
@@ -159,9 +159,7 @@ def draw_trajectory():
     pyplot.gca().invert_yaxis()
     
     #
-    title_text = "Average moving speed:{} pixels/frame\n \
-    Kalman filter distance:{} AFS distance:{}\n \
-    Kalman average diff:{} AFS diff:{}".format(avg_speed, dist_k, dist_p, avg_len_k, avg_len_p)
+    title_text = "Average moving speed:{} pixels/frame\ndist:{} dist:{}, diff:{} diff:{}".format(avg_speed, dist_k, dist_p, avg_len_k, avg_len_p)
     
     
     pyplot.title(title_text  , fontdict=font)
@@ -178,7 +176,7 @@ if __name__ == "__main__" :
             frame = np.ones((1080, 1920, 3), np.uint8) 
             frame = frame * 255 # white background      
             trajecotories = []   
-            speeds = []
+            speeds = []  
             draw_button()  
         if key == ord('t'):
             draw_trajectory()

@@ -58,21 +58,21 @@ window_name = "AI CAM"
 play_mode = "N"
 hide_status = False
 
-gesture_detect_status = False
-mouse_control_status = True
+gesture_detect_status = True
+mouse_control_status = False
 keyboard_monitor_status = True
 
 import PIL
 from PIL import Image,ImageTk
-from tkinter import Tk, Label
+from tkinter import Tk, Label, Canvas, Frame
 
 #16:9
 camera_w = 640
 camera_h = 480
 
 
-window_width =  int(camera_w  * 0.6)
-window_height = int(camera_h  * 0.6)
+window_width =  int(camera_w  * 0.7)
+window_height = int(camera_h  * 0.7)
 
 root = Tk()
 screen_w = root.winfo_screenwidth()
@@ -164,6 +164,41 @@ def show_control_panel():
             # 可考慮不停的視窗狀態，使用不同的顯示方式
             show_video_window()
             hide_mode = False
+            
+def logoOverlay(image,logo,alpha=1.0,x=0, y=0, scale=1.0):
+    (h, w) = image.shape[:2]
+    image = np.dstack([image, np.ones((h, w), dtype="uint8") * 255])
+    overlay = cv2.resize(logo, None,fx=scale,fy=scale)
+    (wH, wW) = overlay.shape[:2]
+    output = image.copy()
+    # blend the two images together using transparent overlays
+    try:
+        if x<0 : x = w+x
+        if y<0 : y = h+y
+        if x+wW > w: wW = w-x  
+        if y+wH > h: wH = h-y
+        print(x,y,wW,wH)
+        overlay=cv2.addWeighted(output[y:y+wH, x:x+wW],alpha,overlay[:wH,:wW],1.0,0)
+        output[y:y+wH, x:x+wW ] = overlay
+    except Exception as e:
+        print("Error: Logo position is overshooting image!")
+        print(e)
+    output= output[:,:,:3]
+    return output
+def show_robot_img(img):
+    robot_img = cv2.imread("img/png/robot.jpg")
+    robot_img = cv2.resize(robot_img, (int(window_width/4), int(window_height/4)))    
+    rows,cols,channels = robot_img.shape
+    overlay=cv2.addWeighted(img[-rows:, 0:0+cols],0.5,robot_img,0.5,0)
+    img[-rows:, 0:0+cols ] = overlay
+    return img
+    '''
+    canvas = Canvas(root, bg="black", width=int(window_width/2), height=int(window_height/2))
+    canvas.pack()
+    photoimage = ImageTk.PhotoImage(file="img/png/robot.png")
+    canvas.create_image(150, 150, image=photoimage)
+    '''
+    
 def show_gesture_label(img, font_size=35):
     #chi_font = True
     #if chi_font == True :
@@ -172,13 +207,15 @@ def show_gesture_label(img, font_size=35):
         # OpenCV putText() only support ASCII font , BGR color
         # cv2.putText(img, gesture_status_label, (20, 70), cv2.FONT_HERSHEY_DUPLEX, 2.5, (100, 100, 255),3)
         #RGBA 
+        #img=show_robot_img(img)
         '''
         213,12,30 R
         69,151,38 G
-        0,107,178 B
+        0,107,17mmm B
         '''
-        left = int(window_width/8.5)
-        top =  int(window_height/4.5) 
+        left = int(window_width/8.5+10)
+        #top =  int(window_height/4.5) 
+        top =  int(window_height-window_height/4-40) 
         if gesture_status_label in gesture_to_desc:
             img = cv2ImgAddText(img, gesture_to_desc[gesture_status_label], left, top,(0,107,178,2),font_size=font_size)
         else :
@@ -191,6 +228,7 @@ def show_gesture_label(img, font_size=35):
             gesture_hide_countdown = 15 
             #gesture_countdown_status = FALSE
             gesture_status_label = ""
+       
     return img
 def process_auto_window(lmslist):
     if len(lmslist) > 0:
@@ -209,7 +247,7 @@ def store_finger_features(img, lmslist):
         # cnt = gesture_detector.detect_finger_count(img, lmslist, hand_label)
         # 文字/左上角座標/字體/字體大小scale/顏色/字体粗細
         #cv2.putText(img, str(cnt), (25, 100), cv2.FONT_HERSHEY_DUPLEX, 4, (0, 0, 255),8)        
-        '''
+        '''m
         img_pil = Image.fromarray(img)
         draw = ImageDraw.Draw(img_pil)        
         draw.text((20, 70),  "中文", font = font , fill = (100, 100, 255, 128))
@@ -321,7 +359,6 @@ def get_frame():
     #直接從camera 設定圖片大小
     img = cv2.resize(img, (window_width, window_height)) 
     img = cv2.flip(img, 1)    #
-   
     
     #處理手勢偵測
     img = detector.find_hands(img, draw=False)  
@@ -343,10 +380,11 @@ def get_frame():
     #else:
         #img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
     
-    
+    #if (len(lmslist) >0 ):
+        #img=show_robot_img(img)
     #output_image = cv2.resize(output_image, (window_widthidth, widow_height)) 
-   
-    base_font_size = 80
+    
+    base_font_size = 50
     img = show_gesture_label(img,font_size=base_font_size)
     #處理 tkinter GUI 邏輯
     cv2image = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)    
@@ -359,6 +397,8 @@ def get_frame():
     lmain.imgtk = imgtk
     lmain.configure(image=imgtk)
     lmain.after(1, get_frame)
+    
+    
     # 計算FPS
     if (img_count % fps_unit == 0) :
         et = time.time()
@@ -501,6 +541,7 @@ if __name__ == "__main__" :
     root.wm_attributes('-transparentcolor','white')
     root.overrideredirect(True)
     root.attributes('-topmost', True)
+   
     root.mainloop() 
     stop_thread_flag.set()  # 停止Thread
     cap.release()

@@ -11,3 +11,7 @@ log/
 .vscode/
 # windows batch
 *.cmd
+*.spec
+img/screenshot/
+hist.txt
+move.txt
