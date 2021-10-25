@@ -58,21 +58,21 @@ window_name = "AI CAM"
 play_mode = "N"
 hide_status = False
 
-gesture_detect_status = True
-mouse_control_status = False
+gesture_detect_status = False
+mouse_control_status = True
 keyboard_monitor_status = True
 
 import PIL
 from PIL import Image,ImageTk
 from tkinter import Tk, Label, Canvas, Frame
 
-#16:9
+#4:3
 camera_w = 640
 camera_h = 480
 
 
-window_width =  int(camera_w  * 1)
-window_height = int(camera_h  * 1)
+window_width =  int(camera_w  * 0.5)
+window_height = int(camera_h  * 0.5)
 
 root = Tk()
 screen_w = root.winfo_screenwidth()
@@ -280,8 +280,8 @@ def detect_gestures():
     gestures = gesture_detector.detect_rock_gesture(landmark_list)
     #gestures += gesture_detector.detect_heart_gesture(landmark_list)
     gestures += gesture_detector.detect_thumb_gesture(landmark_list)
-    #gestures += gesture_detector.detect_click_area(landmark_list)
-    #gestures += gesture_detector.detect_click_gesture(landmark_list)
+    #gestures += gesture_detector.detect_click_area(landmark_list)c
+    #gestures += gesture_mm,,detector.detect_click_gesture(landmark_list)
     #gestures += gesture_detector.detect_direction(landmark_list)
     #print(gesture_detector.detect_click_gesture(landmark_list))
     if len(gestures) > 0 and check_time - last_gesture_detect > dup_action_thres:

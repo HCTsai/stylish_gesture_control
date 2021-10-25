@@ -4,15 +4,21 @@
 ![logo](img/jpg/hand_gesture_remote_control.jpg)
 
 ---
-### 1. 手勢操作電腦
+### 手勢操作電腦
 
-1. 運行 gesture_powerpoint_control.py
-2. 打開 powpoint 進行手勢操作 
-3. 全程使用型男帥氣手勢，完成整個簡報流程 (完全不需要操作鍵盤滑鼠)
+按鍵 m ，可改變視窗顯示模式(正常視窗，透明背景，偵測到事件自動顯示)
+按鍵 c ，可切換滑鼠控制狀態(開啟/關閉 手勢控制滑鼠功能)
+按鍵 g ，可切換手勢控制狀態(開啟/關閉 手勢控制鍵盤功能)
+---
+### 滑鼠手勢控制範例
+
+按鍵 c ，可切換滑鼠控制狀態(開啟/關閉 手勢控制滑鼠功能)
+當滑鼠控制狀態為開啟，即可使用食指控制滑鼠。
 
 ---
-### 2. 手勢操作範例
+### 手勢操作範例
 
+按鍵 g ，可切換手勢控制狀態(開啟/關閉 手勢控制鍵盤功能)
 
 紳士風 (Gentleman Style)
 * [右手比讚] --> [AI 自動執行 page down] --> [簡報下一頁]
@@ -38,7 +44,7 @@
 * (上次我开会手指比心，很多女生都要主动跟我加微信)
 
 ---
-### 3. 安裝說明
+### 安裝說明
 
 #### 使用 pip 安裝以下 Library
 * pip install mediapipe==0.8.3
@@ -52,7 +58,7 @@
 * pip install -r requirements.txt
 
 ---
-### 4. 系統設定說明 
+### 系統設定說明 
 
 
 設定 Hand Gestures 所對應的鍵盤動作：
@@ -79,7 +85,7 @@ data/gesture_to_keyboard.txt
 * 手指比 1,2,3,4,5
 
 ---
-### 5. 原理說明
+### 原理說明
 
 
 * 1.擷取視訊中的frame
@@ -93,7 +99,7 @@ data/gesture_to_keyboard.txt
 * 5.將 Gesutre 轉換成鍵盤事件執行
 
 ---
-### 6. 疑難排解
+### 疑難排解
 
 
 * 問題1: 運行程式碼出現錯誤訊息
@@ -113,7 +119,7 @@ https://github.com/google/mediapipe/issues/1839
 * https://aka.ms/vs/16/release/vc_redist.x64.exe
 
 ---
-### 7. 延伸應用
+### 延伸應用
 
 
 * 智慧製造：
@@ -123,10 +129,9 @@ https://github.com/google/mediapipe/issues/1839
 ![meeting_application](img/jpg/meeting_application.jpg)
 
 ---
-### 8. 開發 Roadmap
+### 開發 Roadmap
 * 手勢錄影：可以錄製自定義手勢。
 * 雙手手勢：基於雙手的手勢控制。
-* 整合滑鼠控制：使用手勢控制滑鼠操作。
 
 #### 參考資料
 1. [mediapipe](https://google.github.io/mediapipe/)
