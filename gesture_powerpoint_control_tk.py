@@ -17,8 +17,7 @@ from tool import mouse_control
 import autopy
 
 # 設定 PYTHONPATH 為專案的根目錄
-# 輸出中文
-# Noto Sans CJK TC https://www.google.com/get/noto/#sans-hant
+# PIL輸出的中文字體 # Noto Sans CJK TC https://www.google.com/get/noto/#sans-hant
 import numpy as np
 from PIL import ImageFont, ImageDraw, Image, ImageGrab
 (screen_w, screen_h) = ImageGrab.grab().size
@@ -360,6 +359,14 @@ def get_frame():
     img = cv2.resize(img, (window_width, window_height)) 
     img = cv2.flip(img, 1)    #
     
+    
+    #處理顯示模式
+    if (not hide_status) and (play_mode != "Normal") :
+        #處理 opencv img 邏輯
+        #img = selfie_segmentation.image_selfie_segmentation(img) 
+        #img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
+        img = selfie_segmentation.image_selfie_segmentation(img,stype="") 
+    
     #處理手勢偵測
     img = detector.find_hands(img, draw=False)  
     lmslist = detector.find_positions(img)  
@@ -372,11 +379,7 @@ def get_frame():
         if (label_text !="") :
             gesture_status_label = label_text        
     #img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
-    if (not hide_status) and (play_mode != "Normal") :
-        #處理 opencv img 邏輯
-        #img = selfie_segmentation.image_selfie_segmentation(img) 
-        #img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
-        img = selfie_segmentation.image_selfie_segmentation(img,stype="") 
+    
     #else:
         #img = selfie_segmentation.image_selfie_segmentation(img,stype="blur") 
     
@@ -530,7 +533,7 @@ if __name__ == "__main__" :
     frame_thread = GustureMonitorThread(stop_frame_thread_flag,frame_ana_interval,thread_type="f")
     frame_thread.start()
     '''
-    #
+    #m
     #監聽鍵盤
     keyboard_thread = Thread(target=keyboard_monitor,args=(0,))
     keyboard_thread.start()

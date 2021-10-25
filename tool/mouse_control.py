@@ -118,10 +118,10 @@ def get_dynamic_weight(px,py,cx,cy):
         #print ("speed")
         move_count += 1
     else :
-        # 移動越快， weight 越小
+        # 手移動越快， weight 越小，座標變動越大，即時追蹤真實座標
+        # 手移動越慢， weight 越大，座標變動越小，越穩定
         # [15,150] --->[0.95,0.05]
-        w = 0.95 - ((movement - 15)/(100-15) * (0.95-0.03)) 
-        weight = w
+        weight = 0.95 - ((movement - 15)/(100-15) * (0.95-0.03)) 
         #print ("move")
         move_count+=1
         #print ("m:{} w:{}".format(movement,w))

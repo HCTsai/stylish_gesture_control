@@ -9,7 +9,7 @@ frame = np.ones((1080, 1920, 3), np.uint8)
 frame *= 255 #white background
 
 #draw button
-def draw_button(x1=int(1920*(2/3)),x2=int(1920*(2/3))+50,y1=int(1080*(2/3)),y2=int(1080*(2/3))+50):
+def draw_button(x1=int(1366*(1/2)),x2=int(1366*(1/2))+50,y1=int(768*(1/2)),y2=int(768*(1/2))+50):
     for y, row in enumerate(frame) :
         for x, col in enumerate(row) :
             if x > x1 and x < x2 and y > y1 and y < y2 :
@@ -138,15 +138,16 @@ def draw_trajectory():
     sum_len_p = 0 
     
     dist_k =  0
-    dist_p =  0    
-    for i, s in enumerate(samples[1:]) :   
+    dist_p =  0
+    last_samples = 10    
+    for i, s in enumerate(samples[-last_samples:]) :   
         sum_len_k += math.hypot(s[2] - s[0], s[3] - s[1])
         sum_len_p += math.hypot(s[4] - s[0], s[5] - s[1])
         dist_k += math.hypot(s[2] - samples[i-1][2], s[3] - samples[i-1][3])
         dist_p += math.hypot(s[4] - samples[i-1][4], s[5] - samples[i-1][5])
     
-    avg_len_k = round(sum_len_k/len(samples),4) 
-    avg_len_p = round(sum_len_p/len(samples),4) 
+    avg_len_k = round(sum_len_k/last_samples,4) 
+    avg_len_p = round(sum_len_p/last_samples,4) 
     avg_speed = round(statistics.mean(speeds),4)
     dist_k = round(dist_k,4)
     dist_p = round(dist_p,4)
@@ -159,7 +160,7 @@ def draw_trajectory():
     pyplot.gca().invert_yaxis()
     
     #
-    title_text = "Average moving speed:{} pixels/frame\ndist:{} dist:{}, diff:{} diff:{}".format(avg_speed, dist_k, dist_p, avg_len_k, avg_len_p)
+    title_text = "Average moving speed:{} pixels/frame\nKalman filter dist:{}, diff:{}\nfirst-order filter dist:{}, diff:{}".format(avg_speed,dist_k,avg_len_k,dist_p,avg_len_p)
     
     
     pyplot.title(title_text  , fontdict=font)
