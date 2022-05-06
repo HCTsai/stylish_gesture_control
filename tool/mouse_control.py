@@ -29,7 +29,7 @@ smooth = 7 # 均線移動的意思
 smooth = 10 
 p_weight = 0.85
 #判斷click or drag
-click_time_thres  = 0.9
+click_time_thres  = 1
 click_dist_thres = 25
 screen_w, screen_h = autopy.screen.size()
 
@@ -38,12 +38,12 @@ p_fs_y = 240
 
 movement_list = []
 filter = "weight_speed"
-
+#filter = "default"
         
 import queue
 mouse_gesture_list = []
 
-    
+enable_mouse_btn = True
 
 
 def init_mouse_control(w,h):
@@ -182,14 +182,15 @@ def control_mouse(cv2, img, lmslist):
         ratio_h = h/cam_h
         # control area
         
+        '''
         cv2.rectangle(img, ( int(left_top_x * ratio_w), int(left_top_y * ratio_h) ), 
                       ( int((left_top_x + w_ctrl_panel) * ratio_w) , int((left_top_y + h_ctrl_panel)*ratio_h)),
-                     (255, 0, 255), 1)
-        
+                     (200, 0, 200), 1)
+        '''
         # Step: Index finger pointing or mouse dragging
         #if fingers[1] == 1 and fingers[2] == 0:
-        gesture = gesture_detector.get_finger_gesture(fingers) 
-        
+        gesture, confidence  = gesture_detector.get_finger_gesture(fingers) 
+        #print (gesture, confidence)
        
         
         # 移動corsor 或 drag
@@ -202,7 +203,7 @@ def control_mouse(cv2, img, lmslist):
             
             # Step6: 平滑移動座標，拆成 smoothening 次移動
             
-            if (filter) :
+            if (filter=="weight_speed") :
                 weight = get_dynamic_weight(p_fs_x, p_fs_y, full_screen_x, full_screen_y)
                 c_x = weight * p_x + (1-weight ) * (full_screen_x) 
                 c_y = weight * p_y + (1-weight ) * (full_screen_y) 
@@ -224,59 +225,60 @@ def control_mouse(cv2, img, lmslist):
             p_x, p_y = c_x, c_y
             p_fs_x, p_fs_y = full_screen_x , full_screen_y
         
+        if enable_mouse_btn and confidence > 9 :        
+            # Step: Index and middle are up: 食指與中指都存在。點擊操作模式        
+            # if gesture == "scissor":
+            # to do : calculating confidence of each gesture
+            if gesture == "scissor": # click buttom
+                # Step9: 計算手指之間的距離
+                # length, img, [x1, y1, x2, y2, cx, cy]
+                # Step10: Click mouse if distance short
+                length, img, lineInfo = gesture_detector.find_distance(lmslist, 8, 12, img,draw=False, r=4)
+                if length < click_dist_thres and  mouse_status == "" and time.time() - last_left_click_time > 1.0  :
+                #if time.time() - last_left_click_time > 1.0 and  mouse_status == "" :
+                    print ("press mouse left")
+                    #img, px, py = gesture_detector.find_center(lmslist, [4,8,12,16,20], img=img, draw=False)
+                    #cv2.circle(img, (px, py), 4, (0, 255, 0), cv2.FILLED)
+                    #autopy.mouse.click() 自動按下滑鼠左鍵不放                
+                    
+                    autopy.mouse.toggle(button=autopy.mouse.Button.LEFT,down=True)
+                    
+                    mouse_status = "left_down"                
+                    last_left_click_time = time.time()
+                    left_press_down_time = time.time()
                 
-        # Step: Index and middle are up: 食指與中指都存在。點擊操作模式        
-        #if gesture == "scissor":
-        if gesture == "scissor": # click buttom
-            # Step9: 計算手指之間的距離
-            # length, img, [x1, y1, x2, y2, cx, cy]
-            # Step10: Click mouse if distance short
-            length, img, lineInfo = gesture_detector.find_distance(lmslist, 8, 12, img,draw=False, r=4)
-            if length < click_dist_thres and  mouse_status == "" and time.time() - last_left_click_time > 1.0  :
-            #if time.time() - last_left_click_time > 1.0 and  mouse_status == "" :
-                print ("press mouse left")
-                #img, px, py = gesture_detector.find_center(lmslist, [4,8,12,16,20], img=img, draw=False)
-                #cv2.circle(img, (px, py), 4, (0, 255, 0), cv2.FILLED)
-                #autopy.mouse.click() 自動按下滑鼠左鍵不放                
-                
-                autopy.mouse.toggle(button=autopy.mouse.Button.LEFT,down=True)
-                
-                mouse_status = "left_down"                
-                last_left_click_time = time.time()
-                left_press_down_time = time.time()
-            
-            if length > click_dist_thres and mouse_status == "left_down" :
+                if length > click_dist_thres and mouse_status == "left_down" :
+                    out_text = release_mouse()
+                    label_text = out_text
+            if gesture == "three" :
+                if time.time() - last_right_click_time > 1.0 and  mouse_status == "" : 
+                    mouse_status = "right_down"  
+                    
+                    autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT,down=True) 
+                    autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT,down=False)  
+                                         
+                    last_right_click_time = time.time()
+                    mouse_status = ""  
+                    print (mouse_status)
+            if (gesture == "pointer") and (mouse_status =="left_down" ) :            
                 out_text = release_mouse()
                 label_text = out_text
-        if gesture == "three" :
-            if time.time() - last_right_click_time > 1.0 and  mouse_status == "" : 
-                mouse_status = "right_down"  
-                
-                autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT,down=True) 
-                autopy.mouse.toggle(button=autopy.mouse.Button.RIGHT,down=False)  
-                                     
-                last_right_click_time = time.time()
-                mouse_status = ""  
-                print (mouse_status)
-        if (gesture == "pointer") and (mouse_status =="left_down" ) :            
-            out_text = release_mouse()
-            label_text = out_text
-        '''  
-        else :
-            if (mouse_status == "left_down") :
-                print ("release mouse left")
-                # 自動鬆開滑鼠左鍵
-                autopy.mouse.toggle(button=autopy.mouse.Button.LEFT,down=False)                
-                # 需要根據滑鼠按下的時間狀態，決定是否 click or draging 意圖
-                if time.time() - left_press_down_time < click_time_thres :
-                    print ("This is click action")
-                    if time.time() - auto_click_time > 1.0 :
-                        autopy.mouse.click()
-                        auto_click_time = time.time()
-                else :
-                    print ("This is dragging action")
-                #回復原始狀態
-                mouse_status = ""
-        '''
+            '''  
+            else :
+                if (mouse_status == "left_down") :
+                    print ("release mouse left")
+                    # 自動鬆開滑鼠左鍵
+                    autopy.mouse.toggle(button=autopy.mouse.Button.LEFT,down=False)                
+                    # 需要根據滑鼠按下的時間狀態，決定是否 click or draging 意圖
+                    if time.time() - left_press_down_time < click_time_thres :
+                        print ("This is click action")
+                        if time.time() - auto_click_time > 1.0 :
+                            autopy.mouse.click()
+                            auto_click_time = time.time()
+                    else :
+                        print ("This is dragging action")
+                    #回復原始狀態
+                    mouse_status = ""
+            '''
     return ""
     #return label_text
