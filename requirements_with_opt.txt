@@ -7,29 +7,36 @@
 # 
 # -------------Mainly depends on package analysis results--------------
 
+keyboard==0.13.5
+autopy==4.0.0
+qpt==1.0b3.dev7
 opencv-python==4.5.2.52
 mediapipe==0.8.6
-autopy==4.0.0
-keyboard==0.13.5
 ttkbootstrap==0.5.1
 
 # ----------------------Ignored dependent packages---------------------
-#qpt==1.0b3.dev7
 
 # ----------------------Ignored sub dependent packages---------------------
+
+# -----Dependencies of qpt
+#pefile
+#ttkbootstrap==0.5.1
+#click
+#wget
+#pillow
 
 # -----Dependencies of opencv-python
 #numpy>=1.14.5
 
 # -----Dependencies of mediapipe
-#protobuf>=3.11.4
-#numpy
-#attrs>=19.1.0
 #wheel
-#six
-#matplotlib
-#absl-py
 #opencv-contrib-python
+#six
+#attrs>=19.1.0
+#absl-py
+#matplotlib
+#numpy
+#protobuf>=3.11.4
 
 # -----Dependencies of ttkbootstrap
 #pillow>=8.2.0

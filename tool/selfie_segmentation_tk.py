@@ -27,8 +27,8 @@ import os
 camera_w = 640
 camera_h = 480
 
-window_width =  int(camera_w  * 0.5)
-window_height = int(camera_h  * 0.5)
+window_width =  int(camera_w  * 0.3)
+window_height = int(camera_h  * 0.3)
 play_mode = "Trans"
 
 root = Tk()
@@ -85,6 +85,7 @@ def move_tk_window(x, y, animation = False):
         #
     geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(x) +"+" + str(y) 
     root.geometry(geo_str)
+    root.geometry(geo_str)
     last_geo_x = x 
     last_geo_y = y
 
@@ -104,7 +105,7 @@ def hide_video_window():
     vanish_y = last_geo_y
     #print("vanish:({},{})".format(vanish_x,vanish_y))
     x = int( (screen_w - window_width) * 0.97)
-    y = -600
+    y = screen_w+1600
     move_tk_window(x,y)
 
 def increase_brightness(img, value=30):
@@ -213,11 +214,12 @@ def keyboard_process(k):
             move_tk_window(x, last_geo_y)
     if (k.event_type == "up") :         
         if k.name == "h" :    
-            if play_mode != "H" :        
+            if play_mode != "H" :      
                 play_mode = "H"
+                hide_video_window()  
                 root.wm_attributes('-transparentcolor',"")
                 root.overrideredirect(False)  
-                hide_video_window()   
+                 
                 #不關閉Camera 因為啟動太慢
                 #cap.release()
                 #cap = None
