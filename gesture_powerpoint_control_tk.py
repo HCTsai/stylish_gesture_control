@@ -54,7 +54,7 @@ h,w,c = 0,0,0 # image height, width, channel
 
 window_name = "AI CAM"
 
-play_mode = "N"
+play_mode = "Auto"
 hide_status = False
 
 gesture_detect_status = True
@@ -69,9 +69,13 @@ from tkinter import Tk, Label, Canvas, Frame
 camera_w = 640
 camera_h = 480
 
+potrait_mode = False # Camera or Phone is vertical 
+if (potrait_mode) :
+    camera_h = 640
+    camera_w = 480
 
-window_width =  int(camera_w  * 0.5)
-window_height = int(camera_h  * 0.5)
+window_width =  int(camera_w  * 0.6)
+window_height = int(camera_h  * 0.6)
 
 root = Tk()
 screen_w = root.winfo_screenwidth()
@@ -347,8 +351,9 @@ st = time.time()
 
 
 def get_frame():    
-    global img_count, st, play_mode
+    global img_count, st, play_mode, potrait_mode
     global gesture_status_label
+    
     fps_unit = 250 
     success, img = cap.read()
     
@@ -359,7 +364,10 @@ def get_frame():
     img = cv2.resize(img, (window_width, window_height)) 
     img = cv2.flip(img, 1)    #
     
-    
+    #手機垂直螢幕模式 Phone or camera is vertical 
+    #img = cv2.rotate(img, cv2.ROTATE_180)
+    if potrait_mode :
+        img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
     #處理顯示模式
     if (not hide_status) and (play_mode != "Normal") :
         #處理 opencv img 邏輯
@@ -447,7 +455,7 @@ def change_play_mode():
 def keyboard_process(k):
     global window_width, window_height, screen_w, screen_h, window_name,window_x, window_y
     global play_mode, gesture_detect_status, mouse_control_status, keyboard_monitor_status
-    scale = 30
+    scale = 40
     move_x = int(screen_w / scale)
     move_y = int(screen_h / scale)
     if (k.event_type == "down") :
@@ -495,13 +503,14 @@ def keyboard_process(k):
                 print ("{}".format(len(mouse_control.movement_list)))
                 list_to_file(mouse_control.movement_list,file_name="move.txt")
                 mouse_control.movement_list = []
-                print ("store record")
+                print ("stQQqqore record")
             if k.name == "print screen" :
                 timestr = time.strftime("%Y%m%d-%H%M%S")
                 autopy.bitmap.capture_screen().save("img/screenshot/screen-{}.png".format(timestr))
                 print ("save screenshot")
-
-def list_to_file(list_name,file_name):
+            if k.name == "q" : 
+                root.destroy()
+def list_to_file(list_name,filqe_name):
     with open(file_name,"w",encoding="utf-8") as of:
         for r in list_name :
             of.write(str(r) + "\n")
@@ -520,7 +529,25 @@ if __name__ == "__main__" :
     gesture_thread = GustureMonitorThread(stop_thread_flag, gesture_monitor_interval,thread_type="g")
     gesture_thread.start()
     # 打開 Web cam
-    cap = cv2.VideoCapture(0)
+    #cap = cv2.VideoCapture(0) 一台電腦可能有多個 cam
+    #cap = cv2.VideoCapture(1)
+    # auto detect live camera by compare continuous frames
+    i = 0 
+    
+    while True:
+        cap = cv2.VideoCapture(i)
+        res1, img1 = cap.read()
+        res2, img2 = cap.read()
+        if res1 and not np.array_equal(img1, img2) :
+            break
+        else:
+            i = (i+1) % 5
+        cap.release()
+    
+    print ("Get camera {}".format(i))
+    cap = cv2.VideoCapture(i) # 0: phone #1: iShot   
+    #cap = cv2.VideoCapture(1) 
+    #print (cap.read()[])
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 3); 
     # 設定camera resolutiona
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, window_width)

@@ -39,8 +39,10 @@ def detect_finger_count(img, landmark_list, hand_label):
     # 判断有几个手指打开
     finger_count  = fingers.count(1)
     return finger_count, fingers
-
+last_gesture = ""
+confidence = 0
 def get_finger_gesture(fingers):
+    global last_gesture, confidence
     gesture = ""    
     if fingers == [0,1,0,0,0] or fingers == [1,1,0,0,0] :
         gesture = "pointer"
@@ -54,7 +56,12 @@ def get_finger_gesture(fingers):
     if fingers == [0,1,1,1,0] :
         gesture = "three"
 # totalFingers = fingers.count(1)
-    return gesture 
+    if gesture == last_gesture :
+        confidence += 1
+    else :
+        last_gesture = gesture 
+        confidence = 0
+    return gesture, confidence 
 
 def find_distance(lmslist, p1, p2, img, draw=True, r=4, t=2):
     h,w,c = img.shape
@@ -209,12 +216,12 @@ def detect_rock_gesture(landmark_list):
     for lmks in landmark_list[0:] :
         if (lmks[8][2] < lmks[20][2] and # 食指 高於 小指
             #小指 高於 中指，無名指
-            lmks[20][2] < lmks[12][2] and lmks[20][2] < lmks[16][2] and 
+            lmks[20][2] < lmks[10][2] and lmks[20][2] < lmks[14][2] and 
             math.fabs(lmks[4][1] - lmks[12][1]) < 0.04#拇指接近中指
             and lmks[0][0] == 1): # 右手
                     right_action_count += 1
         if (lmks[8][2] < lmks[20][2] and  
-            lmks[20][2] < lmks[12][2] and lmks[20][2] < lmks[16][2] and 
+            lmks[20][2] < lmks[10][2] and lmks[20][2] < lmks[14][2] and 
             math.fabs(lmks[4][1] - lmks[12][1]) < 0.04#拇指接近中指
             and lmks[0][0] == 0): #左手
                     left_action_count += 1
@@ -232,8 +239,8 @@ def detect_thumb_gesture(landmark_list):
     gestures = []  
     right_action_count = 0    
     left_action_count = 0
-    right_landmark_count = 0
-    left_landmark_count = 0
+    right_landmark_count = 1
+    left_landmark_count = 1
     for lmks in landmark_list :
         if lmks[0][0] == 1 : 
             right_landmark_count +=1 # 右手
@@ -249,10 +256,11 @@ def detect_thumb_gesture(landmark_list):
                 and lmks[20][1] < lmks[19][1]  #小指向內彎
                 and lmks[0][0] == 0): #左手
                     left_action_count += 1
-    if right_action_count > right_landmark_count/2 :
+    #reliable
+    if (right_action_count/right_landmark_count) > 0.65 :
         #print ("right_thumbs_up count:{}".format(right_action_count))   
         gestures.append("right_thumbs_up")
-    if left_action_count > left_landmark_count/2 :
+    if (left_action_count/left_landmark_count) > 0.65 :
         #print ("left_thumbs_up count :{}".format(left_action_count))   
         gestures.append("left_thumbs_up") 
         #print ("left_thumbs_up count:{}".format(right_action_count)) 
