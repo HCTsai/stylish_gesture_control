@@ -59,7 +59,9 @@ lmain.pack()
 user_hotkey_file = "selfie_config.txt"
 hotkey_dict = {}
 def get_user_hotkey(user_hotkey_file) :
+    global hotkey_dict
     if not os.path.exists(user_hotkey_file) :
+        print ("user hot_key file not found")
         return None  
     with open(user_hotkey_file,"r",encoding="utf-8") as f:
         hotkeys = [l.replace("\n","") for l in f.readlines()]
