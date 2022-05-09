@@ -107,12 +107,12 @@ def get_dynamic_weight(px,py,cx,cy):
     #print ("movement:{}".format(movement))
     test_count += 1
     weight = p_weight
-    if movement < 15: # 如何設計一個參數 adaptive 調整 stop intent and move intent 
+    if movement < 20: # 如何設計一個參數 adaptive 調整 stop intent and move intent 
         weight = 0.95 
         #print ("stable")
         stable_count += 1
         #print ("decrease move speed")
-    elif movement > 100 : #80-90
+    elif movement > 150 : #80-90
         weight = 0.03
         #print ("increase move speed")
         #print ("speed")
@@ -121,7 +121,7 @@ def get_dynamic_weight(px,py,cx,cy):
         # 手移動越快， weight 越小，座標變動越大，即時追蹤真實座標
         # 手移動越慢， weight 越大，座標變動越小，越穩定
         # [15,150] --->[0.95,0.05]
-        weight = 0.95 - ((movement - 15)/(100-15) * (0.95-0.03)) 
+        weight = 0.95 - ((movement - 20)/(150-20) * (0.95-0.03)) 
         #print ("move")
         move_count+=1
         #print ("m:{} w:{}".format(movement,w))

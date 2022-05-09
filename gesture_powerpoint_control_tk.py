@@ -57,7 +57,7 @@ window_name = "AI CAM"
 play_mode = "N"
 hide_status = False
 
-gesture_detect_status = False
+gesture_detect_status = True
 mouse_control_status = True
 keyboard_monitor_status = True
 

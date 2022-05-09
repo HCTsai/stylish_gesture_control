@@ -16,10 +16,13 @@ selfie_segmentation = mp_selfie_segmentation.SelfieSegmentation(model_selection=
 import PIL
 from PIL import Image,ImageTk
 from tkinter import *
+#4:3
+camera_w = 640
+camera_h = 480
 
-window_width = 640
-widow_height = 480
-play_mode = "N"
+window_width =  int(camera_w  * 0.5)
+window_height = int(camera_h  * 0.5)
+play_mode = "Trans"
 
 root = Tk()
 screen_w = root.winfo_screenwidth()
@@ -31,9 +34,9 @@ padding = 8
 left_padding = 300
 
 window_x = screen_w-window_width-30
-window_y = screen_h- widow_height -60
-geo_str = str(window_width) + "x" + str(widow_height) + "+"+ str(window_x) +"+" + str(window_y)
-#geo_str = str(window_width) + "x" + str(widow_height) + "+"+ str(screen_width-window_width-30) +"+" + str(screen_height - widow_height -60)
+window_y = screen_h- window_height -60
+geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(window_x) +"+" + str(window_y)
+#geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(screen_width-window_width-30) +"+" + str(screen_height - window_height -60)
 print (geo_str)
 root.geometry(geo_str)
 lmain = Label(root,background='white',borderwidth = 0, highlightthickness = 0)
@@ -42,7 +45,7 @@ lmain.pack()
 #
 #cap = None
 def move_tk_window(x,y):
-    geo_str = str(window_width) + "x" + str(widow_height) + "+"+ str(x) +"+" + str(y)    
+    geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(x) +"+" + str(y)    
     root.geometry(geo_str)
 def show_video_window():   
     
@@ -51,7 +54,7 @@ def show_video_window():
     #window_x = int((screen_w - window_width) * 0.97)
     #window_y = 20t
     window_x = screen_w-window_width-30
-    window_y = screen_h- widow_height -60
+    window_y = screen_h- window_height -60
     move_tk_window(window_x,window_y) 
 def hide_video_window():
     global screen_w, screen_h, window_name,window_x, window_y
@@ -120,7 +123,7 @@ def image_selfie_segmentation(image, stype="blur"):
 
 def show_frame():
     global play_mode
-    if play_mode == "N" or play_mode == "T" or play_mode == "H" and cap != None :
+    if play_mode == "Trans" or play_mode == "Normal" or play_mode == "H" and cap != None :
         success, img = cap.read()
         if not success :
             print ("not success")
@@ -130,14 +133,14 @@ def show_frame():
         if (play_mode != "H"):
             img = image_selfie_segmentation(img,stype="blur") 
             img = image_selfie_segmentation(img,stype="") 
-        #output_image = cv2.resize(output_image, (window_width, widow_height)) 
+        #output_image = cv2.resize(output_image, (window_width, window_height)) 
         #
         #處理 tkinter GUI 邏輯
         cv2image = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)    
         img = PIL.Image.fromarray(cv2image)
         # 直接透過tk 設定背景色，略過轉換透明色
         #img = image_transparent(img)
-        img = img.resize((window_width, widow_height))
+        img = img.resize((window_width, window_height))
         imgtk = ImageTk.PhotoImage(image=img)
         lmain.imgtk = imgtk
         lmain.configure(image=imgtk)
@@ -169,21 +172,21 @@ def keyboard_process(k):
             #cap.release()
             #cap = None
             print ("change mode:{}".format(play_mode))
-        if k.name == "n" :
+        if k.name == "t" :
             
-            play_mode = "N"
+            play_mode = "Trans"
             root.overrideredirect(True)    
             root.wm_attributes('-transparentcolor','white')        
             show_video_window()
             #if cap == None:
             #    cap = cv2.VideoCapture(0)
             print ("change mode:{}".format(play_mode))
-        if k.name == "t" :
-            play_mode = "T"
+        if k.name == "n" :
+            play_mode = "Normal"
             root.overrideredirect(False)  
             root.wm_attributes('-transparentcolor','white')   
-            #show_frame()          
-            show_video_window()    
+            #改變位置
+            #show_video_window()    
             
             print ("change mode:{}".format(play_mode))
 def keyboard_monitor(type):
@@ -191,13 +194,13 @@ def keyboard_monitor(type):
 if __name__ == "__main__" :    
     
     #width, height = 800, 600
-    play_mode = "N"
+    play_mode = "Trans"
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1); 
     #cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     #cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
-    
+    #設定透明色
     root.wm_attributes('-transparentcolor','white')
     root.overrideredirect(True)
     root.attributes('-topmost', True)
