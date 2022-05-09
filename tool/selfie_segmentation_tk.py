@@ -8,6 +8,11 @@ import mediapipe as mp
 import numpy as np
 import keyboard
 from threading import Thread
+from keyboard import play
+from hashlib import new
+from pip._internal.self_outdated_check import _get_statefile_name
+from setuptools._vendor.more_itertools.more import last
+from matplotlib import animation
 
 mp_drawing = mp.solutions.drawing_utils
 mp_selfie_segmentation = mp.solutions.selfie_segmentation
@@ -16,6 +21,8 @@ selfie_segmentation = mp_selfie_segmentation.SelfieSegmentation(model_selection=
 import PIL
 from PIL import Image,ImageTk
 from tkinter import *
+import os 
+# 
 #4:3
 camera_w = 640
 camera_h = 480
@@ -36,32 +43,69 @@ left_padding = 300
 window_x = screen_w-window_width-30
 window_y = screen_h- window_height -60
 geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(window_x) +"+" + str(window_y)
+#用來記錄隱藏式窗前的位置，用於恢復位置
+last_geo_x = window_x
+last_geo_y = window_y
+#用來記錄隱藏視窗前的位置
+vanish_x = 0 
+vanish_y = 0
 #geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(screen_width-window_width-30) +"+" + str(screen_height - window_height -60)
 print (geo_str)
 root.geometry(geo_str)
 lmain = Label(root,background='white',borderwidth = 0, highlightthickness = 0)
 lmain.pack()
 
-#
+#user hot key
+user_hotkey_file = "selfie_config.txt"
+hotkey_dict = {}
+def get_user_hotkey(user_hotkey_file) :
+    if not os.path.exists(user_hotkey_file) :
+        return None  
+    with open(user_hotkey_file,"r",encoding="utf-8") as f:
+        hotkeys = [l.replace("\n","") for l in f.readlines()]
+        for hotkey in hotkeys :
+            h = hotkey.split(",")
+            hotkey_dict[h[0]] = h[1:]
+
+get_user_hotkey(user_hotkey_file)
+
 #cap = None
-def move_tk_window(x,y):
-    geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(x) +"+" + str(y)    
+def move_tk_window(x, y, animation = False):
+    global last_geo_x, last_geo_y
+    if animation :
+        #Animation
+        step = 8 #移動次數
+        x_step = int((x-last_geo_x)/(step-1)) 
+        y_step = int((y-last_geo_y)/(step-1))
+        for i in range(0,step) :
+            geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(last_geo_x + x_step) +"+" + str(last_geo_y + y_step) 
+            root.geometry(geo_str)
+            last_geo_x = last_geo_x + x_step 
+            last_geo_y = last_geo_y + y_step
+        #
+    geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(x) +"+" + str(y) 
     root.geometry(geo_str)
-def show_video_window():   
-    
-    global screen_w, screen_h, window_name,window_x, window_y
-    #cv2.moveWindow(window_name, int( (screen_w - window_w) * 0.97),-40)  # Move it to (40,30)  
-    #window_x = int((screen_w - window_width) * 0.97)
-    #window_y = 20t
+    last_geo_x = x 
+    last_geo_y = y
+
+def show_default_video_window():  
     window_x = screen_w-window_width-30
     window_y = screen_h- window_height -60
     move_tk_window(window_x,window_y) 
 def hide_video_window():
     global screen_w, screen_h, window_name,window_x, window_y
+    global geo_str, last_geo_str
+    global vanish_x, vanish_y
     #cv2.moveWindow(window_name, int( (screen_w - window_w) * 0.97),-500) # Move it to invisible area
-    window_x = int( (screen_w - window_width) * 0.97)
-    window_y = -600
-    move_tk_window(window_x,window_y)
+    #window_x = int( (screen_w - window_width) * 0.97)
+    #window_y = -600
+    #隱藏時，不更新 windows 的x,y 位置
+    vanish_x = last_geo_x 
+    vanish_y = last_geo_y
+    #print("vanish:({},{})".format(vanish_x,vanish_y))
+    x = int( (screen_w - window_width) * 0.97)
+    y = -600
+    move_tk_window(x,y)
 
 def increase_brightness(img, value=30):
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -150,45 +194,56 @@ def show_frame():
 def keyboard_process(k):
     global window_width, window_height, screen_w, screen_h, window_name,window_x, window_y,play_mode
     global cap
+    global last_geo_x, last_geo_y, vanish_x, vanish_y
     scale = 20
     move_x = int(screen_w / scale)
     move_y = int(screen_h / scale)
-    if (k.event_type == "down") :
+    if (k.event_type == "down") : 
         if k.name == "w" or k.name == "i" :
-            window_y -= move_y
+            y = last_geo_y - move_y
+            move_tk_window(last_geo_x, y)
         if k.name == "s" or k.name == "k":
-            window_y += move_y
+            y = last_geo_y + move_y
+            move_tk_window(last_geo_x, y)
         if k.name == "d" or k.name == "l"  :
-            window_x += move_x
+            x = last_geo_x + move_x
+            move_tk_window(x, last_geo_y)
         if k.name == "a" or k.name == "j":
-            window_x -= move_x  
-        move_tk_window(window_x, window_y)
-        if k.name == "h" :            
-            play_mode = "H"
-            root.overrideredirect(False)
-            hide_video_window()
-            root.wm_attributes('-transparentcolorh',"")            
-            #不關閉Camera 因為啟動太慢
-            #cap.release()
-            #cap = None
-            print ("change mode:{}".format(play_mode))
+            x = last_geo_x - move_x  
+            move_tk_window(x, last_geo_y)
+    if (k.event_type == "up") :         
+        if k.name == "h" :    
+            if play_mode != "H" :        
+                play_mode = "H"
+                root.wm_attributes('-transparentcolor',"")
+                root.overrideredirect(False)  
+                hide_video_window()   
+                #不關閉Camera 因為啟動太慢
+                #cap.release()
+                #cap = None
+                #記憶隱藏前的位置
+                print ("change mode:{}".format(play_mode))
         if k.name == "t" :
-            
-            play_mode = "Trans"
             root.overrideredirect(True)    
-            root.wm_attributes('-transparentcolor','white')        
-            show_video_window()
-            #if cap == None:
-            #    cap = cv2.VideoCapture(0)
+            root.wm_attributes('-transparentcolor','white')  
+            if play_mode == "H" :
+                print("vanish:({},{})".format(vanish_x,vanish_y))
+                move_tk_window(vanish_x, vanish_y)
+            play_mode = "Trans"  
             print ("change mode:{}".format(play_mode))
         if k.name == "n" :
-            play_mode = "Normal"
             root.overrideredirect(False)  
-            root.wm_attributes('-transparentcolor','white')   
-            #改變位置
-            #show_video_window()    
-            
+            root.wm_attributes('-transparentcolor','white') 
+            if play_mode == "H" :
+                print("vanish:({},{})".format(vanish_x,vanish_y))
+                move_tk_window(vanish_x, vanish_y)
+            play_mode = "Normal"
             print ("change mode:{}".format(play_mode))
+        if k.name =="esc": 
+            root.destroy()
+        if k.name in hotkey_dict :
+            loc = hotkey_dict[k.name]
+            move_tk_window(int(loc[0]), int(loc[1]),animation=True)
 def keyboard_monitor(type):
     keyboard.hook(keyboard_process)      
 if __name__ == "__main__" :    

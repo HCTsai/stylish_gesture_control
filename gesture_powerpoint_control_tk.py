@@ -508,7 +508,7 @@ def keyboard_process(k):
                 timestr = time.strftime("%Y%m%d-%H%M%S")
                 autopy.bitmap.capture_screen().save("img/screenshot/screen-{}.png".format(timestr))
                 print ("save screenshot")
-            if k.name == "q" : 
+            if k.name == "q" or k.name =="esc": 
                 root.destroy()
 def list_to_file(list_name,filqe_name):
     with open(file_name,"w",encoding="utf-8") as of:
