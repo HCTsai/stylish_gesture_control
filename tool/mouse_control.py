@@ -9,6 +9,7 @@ import autopy
 from tool import gesture_detector
 from tool import kalman_filter
 import math
+from config import guesture_config
 #status
 mouse_status =""
 #
@@ -39,11 +40,11 @@ p_fs_y = 240
 movement_list = []
 filter = "weight_speed"
 #filter = "default"
-        
-import queue
+
 mouse_gesture_list = []
 
-enable_mouse_btn = True
+enable_mouse_btn = guesture_config.enable_mouse_btn
+display_panel_area = guesture_config.display_panel_area
 
 
 def init_mouse_control(w,h):
@@ -182,10 +183,10 @@ def control_mouse(cv2, img, lmslist):
         ratio_h = h/cam_h
         # control area
         
-        
-        cv2.rectangle(img, ( int(left_top_x * ratio_w), int(left_top_y * ratio_h) ), 
-                      ( int((left_top_x + w_ctrl_panel) * ratio_w) , int((left_top_y + h_ctrl_panel)*ratio_h)),
-                     (200, 0, 200), 1)
+        if display_panel_area:
+            cv2.rectangle(img, ( int(left_top_x * ratio_w), int(left_top_y * ratio_h) ), 
+                          ( int((left_top_x + w_ctrl_panel) * ratio_w) , int((left_top_y + h_ctrl_panel)*ratio_h)),
+                         (200, 0, 200), 1)
         
         # Step: Index finger pointing or mouse dragging
         #if fingers[1] == 1 and fingers[2] == 0:

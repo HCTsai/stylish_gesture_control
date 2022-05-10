@@ -22,6 +22,7 @@ import PIL
 from PIL import Image,ImageTk
 from tkinter import *
 import os 
+from utils import filetool
 # 
 #4:3
 camera_w = 640
@@ -56,20 +57,8 @@ lmain = Label(root,background='white',borderwidth = 0, highlightthickness = 0)
 lmain.pack()
 
 #user hot key
-user_hotkey_file = "selfie_config.txt"
-hotkey_dict = {}
-def get_user_hotkey(user_hotkey_file) :
-    global hotkey_dict
-    if not os.path.exists(user_hotkey_file) :
-        print ("user hot_key file not found")
-        return None  
-    with open(user_hotkey_file,"r",encoding="utf-8") as f:
-        hotkeys = [l.replace("\n","") for l in f.readlines()]
-        for hotkey in hotkeys :
-            h = hotkey.split(",")
-            hotkey_dict[h[0]] = h[1:]
-
-get_user_hotkey(user_hotkey_file)
+user_hotkey_file = "../config/hotkey_config.txt"
+hotkey_dict = filetool.get_user_hotkey(user_hotkey_file)
 
 #cap = None
 def move_tk_window(x, y, animation = False):
@@ -198,6 +187,7 @@ def keyboard_process(k):
     global window_width, window_height, screen_w, screen_h, window_name,window_x, window_y,play_mode
     global cap
     global last_geo_x, last_geo_y, vanish_x, vanish_y
+    global hotkey_dict
     scale = 20
     move_x = int(screen_w / scale)
     move_y = int(screen_h / scale)
@@ -246,8 +236,9 @@ def keyboard_process(k):
         if k.name =="esc": 
             root.destroy()
         if k.name in hotkey_dict :
-            loc = hotkey_dict[k.name]
-            move_tk_window(int(loc[0]), int(loc[1]),animation=True)
+            params = hotkey_dict[k.name]
+            if params[0]=="pos" :
+                move_tk_window(int(params[1]), int(params[2]),animation=True)
 def keyboard_monitor(type):
     keyboard.hook(keyboard_process)      
 if __name__ == "__main__" :    

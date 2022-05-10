@@ -15,11 +15,17 @@ from threading import Thread
 from threading import Event as ev
 from tool import mouse_control
 import autopy
-
+import os 
 # 設定 PYTHONPATH 為專案的根目錄
 # PIL輸出的中文字體 # Noto Sans CJK TC https://www.google.com/get/noto/#sans-hant
 import numpy as np
 from PIL import ImageFont, ImageDraw, Image, ImageGrab
+import PIL
+from PIL import Image,ImageTk
+from tkinter import Tk, Label, Canvas, Frame
+
+from utils import filetool
+from config import guesture_config
 (screen_w, screen_h) = ImageGrab.grab().size
 font_path = "data/NotoSansCJKtc-Bold.otf" # <== Noto Sans CJK TC 
 fs = ImageFont.truetype(font_path, 53, encoding="utf-8")
@@ -44,7 +50,7 @@ last_check = time.time()
 last_gesture_detect = time.time()
 
 # 手勢轉鍵盤動作
-gesture_config_path = "data/gesture_to_keyboard.txt"
+gesture_config_path = "config/gesture_to_keyboard.txt"
 gesture_keyborad = filetools.file_to_list(gesture_config_path)
 # gesture names to keyboard keys dictionary
 gesture_to_keyboard = {gk[0]:gk[1] for gk in gesture_keyborad}
@@ -57,13 +63,11 @@ window_name = "AI CAM"
 play_mode = "Auto"
 hide_status = False
 
-gesture_detect_status = True
-mouse_control_status = True
-keyboard_monitor_status = True
+gesture_detect_status = guesture_config.gesture_detect_status
+mouse_control_status = guesture_config.mouse_control_status
+keyboard_monitor_status = guesture_config.keyboard_monitor_status
 
-import PIL
-from PIL import Image,ImageTk
-from tkinter import Tk, Label, Canvas, Frame
+
 
 #4:3
 camera_w = 640
@@ -88,11 +92,17 @@ left_padding = 300
 window_x = screen_w-window_width-30
 window_y = screen_h- window_height -60
 geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(window_x) +"+" + str(window_y)
-print (geo_str)
+last_geo_x, last_geo_y = window_x, window_y
+vanish_x, vanish_y = window_x, window_y
 root.geometry(geo_str)
 lmain = Label(root,background='white',borderwidth = 0, highlightthickness = 0)
 lmain.pack()
 
+
+#user hot key
+user_hotkey_file = "config/hotkey_config.txt"
+hotkey_dict = filetool.get_user_hotkey(user_hotkey_file)
+print(hotkey_dict)
 
 def show_config():
     print("Window name:{}, screen_w:{}, screen_h:{}, window_width:{}, window_height:{}"
@@ -109,20 +119,19 @@ def cv2ImgAddText(img, text, left, top, textColor=(255,100, 100,128),font_size=3
     draw.text((left, top), text, textColor, font=fs, stroke_width=3, stroke_fill=stroke_color)
     #draw.text((left, top), text, textColor, font=fs)
     return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
-def show_video_window():   
+def show_window_by_pos(x,y):   
     global screen_w, screen_h, window_name,window_x, window_y
     global hide_status
-    #cv2.moveWindow(window_name, int( (screen_w -m window_w) * 0.97),-40)  # Move it to (40,30)  
-    #window_x = int((screen_w - window_width) * 0.97)
-    #window_y = 20t
-    window_x = screen_w-window_width-30
-    window_y = screen_h- window_height -60
-    move_tk_window(window_x,window_y) 
+    move_tk_window(x, y) 
     hide_status = False
 def hide_video_window():
     global screen_w, screen_h, window_name,window_x, window_y
-    global hide_status     
+    global hide_status
+    global last_geo_x, last_geo_y, vanish_x, vanish_y     
     #cv2.moveWindow(window_name, int( (screen_w - window_w) * 0.97),-500) # Move it to invisible area
+    
+    vanish_x = last_geo_x 
+    vanish_y = last_geo_y
     window_x = int( (screen_w - window_width) * 0.97)
     window_y = -600
     move_tk_window(window_x,window_y)
@@ -165,8 +174,8 @@ def show_control_panel():
             root.overrideredirect(True)
             root.wm_attributes('-transparentcolor',"white")  
             # 可考慮不停的視窗狀態，使用不同的顯示方式
-            show_video_window()
-            hide_mode = False
+            show_window_by_pos(last_geo_x,last_geo_y)
+            
             
 def logoOverlay(image,logo,alpha=1.0,x=0, y=0, scale=1.0):
     (h, w) = image.shape[:2]
@@ -323,10 +332,24 @@ def detect_gesture_sequence():
         keyboard.press_and_release("3+enter")
         gesture_status_label = "跳頁"
         gesture_queue.queue.clear()
-def move_tk_window(x,y):
-    geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(x) +"+" + str(y)    
+def move_tk_window(x,y,animation=False):
+    global last_geo_x, last_geo_y
+    if animation :
+        #Animation
+        step = 8 #移動次數
+        x_step = int((x-last_geo_x)/(step-1)) 
+        y_step = int((y-last_geo_y)/(step-1))
+        for i in range(0,step) :
+            geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(last_geo_x + x_step) +"+" + str(last_geo_y + y_step) 
+            root.geometry(geo_str)
+            last_geo_x = last_geo_x + x_step 
+            last_geo_y = last_geo_y + y_step
+        #
+    geo_str = str(window_width) + "x" + str(window_height) + "+"+ str(x) +"+" + str(y) 
     root.geometry(geo_str)
-    print ("move window: x:{} y:{}".format(x,y))
+    root.geometry(geo_str)
+    last_geo_x = x 
+    last_geo_y = y
 class GustureMonitorThread(Thread):
     
     # 專門監控是否有特殊手勢的 Thread
@@ -429,25 +452,34 @@ def change_play_mode():
     global hide_status
     change_type = play_mode_list[change_mode_index % len(play_mode_list)]
     if change_type == "Trans" :
+        if play_mode == "H" :
+            print("vanish:({},{})".format(vanish_x,vanish_y))
+            move_tk_window(vanish_x, vanish_y)
         play_mode = "Trans"
         root.overrideredirect(True)    
         root.wm_attributes('-transparentcolor','white')        
-        show_video_window()
+        show_window_by_pos(last_geo_x,last_geo_y)
         #if cap == None:a
         #    cap = cv2.VideoCapture(0)
         print ("change mode:{}".format(play_mode))
     if change_type == "Title" :
+        if play_mode == "H" :
+            print("vanish:({},{})".format(vanish_x,vanish_y))
+            move_tk_window(vanish_x, vanish_y)
         play_mode = "Title"
         root.overrideredirect(False)  
         root.wm_attributes('-transparentcolor','white')   
         #show_frame()          
-        show_video_window()    
+        show_window_by_pos(last_geo_x,last_geo_y)   
         print ("change mode:{}".format(play_mode))
     if change_type == "Normal" :
+        if play_mode == "H" :
+            print("vanish:({},{})".format(vanish_x,vanish_y))
+            move_tk_window(vanish_x, vanish_y)
         play_mode = "Normal"
         root.overrideredirect(False)
         root.wm_attributes('-transparentcolor',"")  
-        show_video_window()   
+        show_window_by_pos(last_geo_x,last_geo_y) 
         hide_status = False 
         print ("change mode:{}".format(play_mode))
     change_mode_index +=1     
@@ -455,6 +487,7 @@ def change_play_mode():
 def keyboard_process(k):
     global window_width, window_height, screen_w, screen_h, window_name,window_x, window_y
     global play_mode, gesture_detect_status, mouse_control_status, keyboard_monitor_status
+    global last_geo_x, last_geo_y, vanish_x, vanish_y
     scale = 40
     move_x = int(screen_w / scale)
     move_y = int(screen_h / scale)
@@ -465,18 +498,17 @@ def keyboard_process(k):
             print ("change keyboard monitor status:{}".format(keyboard_monitor_status))
         if keyboard_monitor_status:
             if k.name == "i" :
-                window_y -= move_y
-            if k.name == "k" :
-                window_y += move_y
-            if k.name == "l" :
-                window_x += move_x
-            if k.name == "j" :
-                window_x -= move_x   
-            move_tk_window(window_x, window_y)
-            #
-            if k.name == "w" :
-                window_x, window_y = 674, 305
-                move_tk_window(window_x, window_y)
+                y = last_geo_y - move_y
+                move_tk_window(last_geo_x, y)
+            if k.name == "k":
+                y = last_geo_y + move_y
+                move_tk_window(last_geo_x, y)
+            if  k.name == "l"  :
+                x = last_geo_x + move_x
+                move_tk_window(x, last_geo_y)
+            if k.name == "j":
+                x = last_geo_x - move_x  
+                move_tk_window(x, last_geo_y)
             #
             if k.name == "m" :            
                 change_play_mode()
@@ -485,9 +517,7 @@ def keyboard_process(k):
                 root.wm_attributes('-transparentcolor',"")
                 root.overrideredirect(False)  
                 hide_video_window()
-                #不關閉Camera 因為啟動太慢
-                #cap.release()
-                #cap = None
+                #隱藏視窗時，不關閉Camera 因為啟動Camera太慢
                 print ("change mode:{}".format(play_mode))
             if k.name == "g" :
                 gesture_detect_status = not gesture_detect_status          
@@ -501,24 +531,26 @@ def keyboard_process(k):
                 print ("change mode:{}".format(play_mode))
             if k.name == "z" :
                 print ("{}".format(len(mouse_control.movement_list)))
-                list_to_file(mouse_control.movement_list,file_name="move.txt")
+                filetool.list_to_file(mouse_control.movement_list,file_name="move.txt")
                 mouse_control.movement_list = []
                 print ("stQQqqore record")
             if k.name == "print screen" :
-                timestr = time.strftime("%Y%m%d-%H%M%S")
+                timestr = time.strftime("%Y%m%d-%H%M%1234123412S")
                 autopy.bitmap.capture_screen().save("img/screenshot/screen-{}.png".format(timestr))
                 print ("save screenshot")
+            if k.name in hotkey_dict :
+                params = hotkey_dict[k.name]
+                if params[0]=="pos" :
+                    move_tk_window(int(params[1]), int(params[2]),animation=True)
+                if params[0]=="w_size" :
+                    window_width = int(window_width * (1 + int(params[1])/100))
+                    window_height = int(window_height * (1 + int(params[1])/100))
+                    print ("change window size:({},{})".format(window_width, window_height))
+                    show_window_by_pos(last_geo_x,last_geo_y)
             if k.name == "q" or k.name =="esc": 
                 root.destroy()
-def list_to_file(list_name,filqe_name):
-    with open(file_name,"w",encoding="utf-8") as of:
-        for r in list_name :
-            of.write(str(r) + "\n")
             
-    with open ("hist.txt","w",encoding="utf-8") as of :
-        hist, bins=np.histogram(np.array(list_name),bins=np.linspace(0,1280,128))
-        for i, h in enumerate(hist) : 
-            of.write(str(h) +"\t" + str(bins[i])  + "\n")
+
 def keyboard_monitor(type):
     keyboard.hook(keyboard_process)    
 if __name__ == "__main__" :     
