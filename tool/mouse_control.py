@@ -182,11 +182,11 @@ def control_mouse(cv2, img, lmslist):
         ratio_h = h/cam_h
         # control area
         
-        '''
+        
         cv2.rectangle(img, ( int(left_top_x * ratio_w), int(left_top_y * ratio_h) ), 
                       ( int((left_top_x + w_ctrl_panel) * ratio_w) , int((left_top_y + h_ctrl_panel)*ratio_h)),
                      (200, 0, 200), 1)
-        '''
+        
         # Step: Index finger pointing or mouse dragging
         #if fingers[1] == 1 and fingers[2] == 0:
         gesture, confidence  = gesture_detector.get_finger_gesture(fingers) 
