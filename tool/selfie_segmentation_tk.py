@@ -11,7 +11,7 @@ from threading import Thread
 from keyboard import play
 from hashlib import new
 from pip._internal.self_outdated_check import _get_statefile_name
-from setuptools._vendor.more_itertools.more import last
+
 from matplotlib import animation
 
 mp_drawing = mp.solutions.drawing_utils
