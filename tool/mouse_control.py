@@ -222,7 +222,7 @@ def control_mouse(cv2, img, lmslist):
             h,w,c = img.shape
             x1, y1 = lmslist[8][1:]
             x1, y1 = int(x1 * w), int(y1 * h) 
-            cv2.circle(img, (x1, y1), 3, (0, 255, 0), cv2.FILLED)
+            cv2.circle(img, (x1, y1), 4, (0, 255, 0), cv2.FILLED)
             p_x, p_y = c_x, c_y
             p_fs_x, p_fs_y = full_screen_x , full_screen_y
         

@@ -4,7 +4,6 @@
 3,pos,100,600
 4,pos,1000,600
 5,pos,500,500
-a,pos,600,600
 #key,windows size,percentage
 9,w_size,10
 0,w_size,-10

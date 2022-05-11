@@ -129,12 +129,11 @@ def hide_video_window():
     global hide_status
     global last_geo_x, last_geo_y, vanish_x, vanish_y     
     #cv2.moveWindow(window_name, int( (screen_w - window_w) * 0.97),-500) # Move it to invisible area
-    
     vanish_x = last_geo_x 
     vanish_y = last_geo_y
-    window_x = int( (screen_w - window_width) * 0.97)
-    window_y = -600
-    move_tk_window(window_x,window_y)
+    x = int( (screen_w - window_width) * 0.97)
+    y = -600
+    move_tk_window(x,y)
     hide_status = True
 def hide_control_panel():
     global hand_status, window_countdown_status, window_hidden_countdown, window_show_countdown
@@ -159,6 +158,7 @@ def hide_control_panel():
 def show_control_panel():
     global hand_status, window_countdown_status, window_hidden_countdown, window_show_countdown
     global hide_modee
+    global vanish_x, vanish_y
     # 如果畫面是從 沒有手，變成有手，顯示視窗
     if (hand_status == 0) :
         window_countdown_status = True 
@@ -172,9 +172,12 @@ def show_control_panel():
             window_show_countdown = 10
             # 不改變視窗狀態 沿用原始設定
             root.overrideredirect(True)
-            root.wm_attributes('-transparentcolor',"white")  
+            root.wm_attributes('-transparentcolor',"white") 
+             
             # 可考慮不停的視窗狀態，使用不同的顯示方式
-            show_window_by_pos(last_geo_x,last_geo_y)
+            #x = screen_w-window_width-30
+            #y = screen_h- window_height -60
+            show_window_by_pos(vanish_x, vanish_y)
             
             
 def logoOverlay(image,logo,alpha=1.0,x=0, y=0, scale=1.0):
@@ -447,12 +450,14 @@ def get_frame():
         
 play_mode_list = ["Trans","Title", "Normal"] 
 change_mode_index = 1 
-def change_play_mode():
+def change_play_mode(change_type="iteration"):
     global play_mode, play_mode_list, change_mode_index
     global hide_status
-    change_type = play_mode_list[change_mode_index % len(play_mode_list)]
+    if change_type=="iteration" :
+        change_type = play_mode_list[change_mode_index % len(play_mode_list)]
+    
     if change_type == "Trans" :
-        if play_mode == "H" :
+        if play_mode == "H" or play_mode == "Auto":
             print("vanish:({},{})".format(vanish_x,vanish_y))
             move_tk_window(vanish_x, vanish_y)
         play_mode = "Trans"
@@ -463,7 +468,7 @@ def change_play_mode():
         #    cap = cv2.VideoCapture(0)
         print ("change mode:{}".format(play_mode))
     if change_type == "Title" :
-        if play_mode == "H" :
+        if play_mode == "H" or play_mode == "Auto" :
             print("vanish:({},{})".format(vanish_x,vanish_y))
             move_tk_window(vanish_x, vanish_y)
         play_mode = "Title"
@@ -473,7 +478,7 @@ def change_play_mode():
         show_window_by_pos(last_geo_x,last_geo_y)   
         print ("change mode:{}".format(play_mode))
     if change_type == "Normal" :
-        if play_mode == "H" :
+        if play_mode == "H" or play_mode == "Auto"  :
             print("vanish:({},{})".format(vanish_x,vanish_y))
             move_tk_window(vanish_x, vanish_y)
         play_mode = "Normal"
@@ -510,8 +515,6 @@ def keyboard_process(k):
                 x = last_geo_x - move_x  
                 move_tk_window(x, last_geo_y)
             #
-            if k.name == "m" :            
-                change_play_mode()
             if k.name == "h" :            
                 play_mode = "H"
                 root.wm_attributes('-transparentcolor',"")
@@ -519,21 +522,35 @@ def keyboard_process(k):
                 hide_video_window()
                 #隱藏視窗時，不關閉Camera 因為啟動Camera太慢
                 print ("change mode:{}".format(play_mode))
+            if k.name == "s" :            
+                change_play_mode("Trans")
+                #隱藏視窗時，不關閉Camera 因為啟動Camera太慢
+                print ("change mode:{}".format(play_mode))
+            
+            
+            '''
+            if k.name == "a" :
+                play_mode = "Auto"          
+                hide_video_window()
+                print ("change mode:{}".format(play_mode))
+            if k.name == "m" :            
+                change_play_mode()
+            if k.name == "a" :
+                play_mode = "Auto"          
+                hide_video_window()
+                print ("change mode:{}".format(play_mode))
             if k.name == "g" :
                 gesture_detect_status = not gesture_detect_status          
                 print ("change gesture status:{}".format(gesture_detect_status))
             if k.name == "c" :
                 mouse_control_status = not mouse_control_status          
                 print ("change mouse status:{}".format(mouse_control_status))    
-            if k.name == "a" :
-                play_mode = "Auto"          
-                hide_video_window()
-                print ("change mode:{}".format(play_mode))
             if k.name == "z" :
                 print ("{}".format(len(mouse_control.movement_list)))
                 filetool.list_to_file(mouse_control.movement_list,file_name="move.txt")
                 mouse_control.movement_list = []
                 print ("stQQqqore record")
+            '''
             if k.name == "print screen" :
                 timestr = time.strftime("%Y%m%d-%H%M%1234123412S")
                 autopy.bitmap.capture_screen().save("img/screenshot/screen-{}.png".format(timestr))
