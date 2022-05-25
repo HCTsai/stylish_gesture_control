@@ -1,11 +1,9 @@
 #gesture_name,keyboard_key,dislpay_label
 #move_left,esc,跳出
 #move_right,shift+F5,播放
+#left_heart,esc,跳出
+#right_heart,shift+F5,播放
 right_thumbs_up,page down,下一頁
 left_thumbs_up,page up,上一頁
 left_rock,esc,跳出
 right_rock,shift+F5,播放
-#left_heart,esc,跳出
-#right_heart,shift+F5,播放
-#click_3,,..
-#click_4,,..

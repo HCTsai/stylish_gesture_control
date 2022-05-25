@@ -53,8 +53,8 @@ last_gesture_detect = time.time()
 gesture_config_path = "config/gesture_to_keyboard.txt"
 gesture_keyborad = filetools.file_to_list(gesture_config_path)
 # gesture names to keyboard keys dictionary
-gesture_to_keyboard = {gk[0]:gk[1] for gk in gesture_keyborad}
-gesture_to_desc = {gk[0]:gk[2] for gk in gesture_keyborad}
+gesture_to_keyboard = {gk[0]:gk[1] for gk in gesture_keyborad if len(gk)==3}
+gesture_to_desc = {gk[0]:gk[2] for gk in gesture_keyborad if len(gk)==3}
 # 紀錄 image 資訊
 h,w,c = 0,0,0 # image height, width, channel
 
