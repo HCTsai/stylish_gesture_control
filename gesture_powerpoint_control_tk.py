@@ -497,7 +497,6 @@ def keyboard_process(k):
     move_x = int(screen_w / scale)
     move_y = int(screen_h / scale)
     if (k.event_type == "down") :
-        print (k.name)
         if k.name == "ctrl" :
             keyboard_monitor_status = not keyboard_monitor_status
             print ("change keyboard monitor status:{}".format(keyboard_monitor_status))
@@ -564,7 +563,7 @@ def keyboard_process(k):
                     window_height = int(window_height * (1 + int(params[1])/100))
                     print ("change window size:({},{})".format(window_width, window_height))
                     show_window_by_pos(last_geo_x,last_geo_y)
-            if k.name == "q" or k.name =="esc": 
+            if k.name == "q" : 
                 root.destroy()
             
 
