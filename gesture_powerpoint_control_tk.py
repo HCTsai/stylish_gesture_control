@@ -84,7 +84,6 @@ window_height = int(camera_h  * 0.6)
 root = Tk()
 screen_w = root.winfo_screenwidth()
 screen_h = root.winfo_screenheight()
-root.bind('<Escape>', lambda e: root.quit())
 root.title("AI CAM")
 appHeight = 140
 padding = 8
