@@ -562,7 +562,7 @@ def keyboard_process(k):
                     window_height = int(window_height * (1 + int(params[1])/100))
                     print ("change window size:({},{})".format(window_width, window_height))
                     show_window_by_pos(last_geo_x,last_geo_y)
-            if k.name == "q" : 
+            if k.name == "q": 
                 root.destroy()
             
 
